@@ -24,6 +24,7 @@ public class Member {
     private String email;
     private LocalDate birth;
     private String social;
+    private String refreshToken;
     private LocalDate redate;
 
     //----------------------------------------생성 메서드-------------------------------------------------------
@@ -39,6 +40,10 @@ public class Member {
         member.redate = redate;
 
         return member;
+    }
+
+    public void updateRefreshToken(String refreshToken){
+        this.refreshToken = refreshToken;
     }
 
     //--------------------------------------연관 관계 메서드-----------------------------------------------------
