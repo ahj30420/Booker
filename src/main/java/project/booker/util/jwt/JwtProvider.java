@@ -3,25 +3,33 @@ package project.booker.util.jwt;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
+import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import project.booker.controller.LoginController.dto.response.AccessTokenDto;
 
+import java.security.Key;
 import java.util.Base64;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
 @Component
+@NoArgsConstructor
 public class JwtProvider {
 
-    @Value("{jwt.token.key}")
+    @Value("${jwt.token.key}")
     private String secretKey;
+    private Key key;
 
-    //보안을 위해 secretKey를 Base64로 인코딩하기
+
+    //보안을 위해 HS256 알고리즘에 적합한 보안 키로 암호화
     @PostConstruct
     protected void init(){
         secretKey = Base64.getEncoder().encodeToString(secretKey.getBytes());
+        key = Keys.hmacShaKeyFor(secretKey.getBytes());
     }
 
     //Jwt객체 생성(accessToken, refreshToken)
@@ -34,10 +42,16 @@ public class JwtProvider {
                 .build();
     }
 
+    //RefreshToken으로 AccessToken 새로 발급
+    public AccessTokenDto createAccessToken(Map<String, Object> claims){
+        String accessToken = createToken(claims, getExpireDateAccessToken());
+        return new AccessTokenDto(accessToken);
+    }
+
     //JWT 토큰에서 Claim 정보 추출하는 함수
     public Claims getClaims(String token){
         return Jwts.parserBuilder()
-                .setSigningKey(secretKey)
+                .setSigningKey(key)
                 .build()
                 .parseClaimsJws(token)
                 .getBody();
@@ -48,7 +62,7 @@ public class JwtProvider {
         return Jwts.builder()
                 .setClaims(claims)
                 .setExpiration(expireDate)
-                .signWith(SignatureAlgorithm.HS256, secretKey)
+                .signWith(SignatureAlgorithm.HS256, key)
                 .compact();
     }
 
@@ -58,10 +72,10 @@ public class JwtProvider {
         return new Date(System.currentTimeMillis() + expireTime);
     }
 
-    //RefreshToken 만료 기간 설정(24시간)
+    //RefreshToken 만료 기간 설정(3일)
     private Date getExpireDateRefreshToken() {
-        long expireTime = 1000 * 60 * 60 * 24;
-        return null;
+        long expireTime = 1000 * 60 * 60 * 24 * 7;
+        return new Date(System.currentTimeMillis() + expireTime);
     }
 
 }

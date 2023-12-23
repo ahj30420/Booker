@@ -1,19 +1,19 @@
 package project.booker.service.loginService;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import project.booker.controller.LoginController.dto.request.LoginRequestDto;
+import project.booker.controller.LoginController.dto.request.LoginDto;
+import project.booker.controller.LoginController.dto.response.AccessTokenDto;
 import project.booker.domain.Member;
-import project.booker.controller.LoginController.dto.request.JoinRequestDto;
+import project.booker.controller.LoginController.dto.request.JoinDto;
 import project.booker.dto.AuthenticatedUser;
 import project.booker.exception.exceptions.DuplicatedIDException;
+import project.booker.exception.exceptions.InvalidRefreshTokenException;
 import project.booker.repository.LoginRepository;
 import project.booker.exception.errorcode.ErrorCode;
-import project.booker.util.jwt.Jwt;
 import project.booker.util.jwt.JwtProvider;
 
 import java.time.LocalDate;
@@ -35,18 +35,18 @@ public class LoginServiceImpl implements LoginService {
      * 일반 회원가입
      */
     @Transactional
-    public void NomarlJoin(JoinRequestDto joinRequestDto){
+    public void NomarlJoin(JoinDto joinDto){
 
-        ValidateDuplicateId(joinRequestDto);
+        ValidateDuplicateId(joinDto);
 
-        String id = joinRequestDto.getId();
+        String id = joinDto.getId();
 
         //pw는 민감한 정보이기 때문에 암호화해서 DB에 저장합니다.
-        String pw = bCryptPasswordEncoder.encode(joinRequestDto.getPw());
+        String pw = bCryptPasswordEncoder.encode(joinDto.getPw());
 
-        String name = joinRequestDto.getName();
-        String email = joinRequestDto.getEmail();
-        LocalDate birth = joinRequestDto.getBirth();
+        String name = joinDto.getName();
+        String email = joinDto.getEmail();
+        LocalDate birth = joinDto.getBirth();
         String social = "normal";
         LocalDate date = LocalDate.now();
 
@@ -59,10 +59,10 @@ public class LoginServiceImpl implements LoginService {
      * 로그인 시 ID, PW로 회원 검증
      */
     @Transactional
-    public Member VerifyUser(LoginRequestDto loginRequestDto) {
+    public Member VerifyUser(LoginDto loginDto) {
 
-        Member VerifyUser = loginRepository.findLoginByIdAndSocial(loginRequestDto.getId(),"normal");
-        if((VerifyUser == null) || bCryptPasswordEncoder.matches(loginRequestDto.getPw(), VerifyUser.getPw())){
+        Member VerifyUser = loginRepository.findLoginByIdAndSocial(loginDto.getId(),"normal");
+        if(VerifyUser == null || !bCryptPasswordEncoder.matches(loginDto.getPw(), VerifyUser.getPw())){
             return null;
         }
 
@@ -82,23 +82,24 @@ public class LoginServiceImpl implements LoginService {
     }
 
     /**
-     * refresh 토큰으로 토큰 갱신하기
+     * refreshToken으로 accessToken 갱신하기
      */
-    public Jwt refreshToken(String refreshToken){
+    public AccessTokenDto refreshToken(String refreshToken){
         try{
             jwtProvider.getClaims(refreshToken);
             Member member = loginRepository.findByRefreshToken(refreshToken);
-            if(member == null){ return null; }
+            if (member == null) {
+                throw new NullPointerException();
+            }
 
-            Map<String, Object> claims = new HashMap<>();
-            AuthenticatedUser authenticatedUser = new AuthenticatedUser(member.getId(),member.getName());
+            Map<String, Object> NewClaims = new HashMap<>();
+            AuthenticatedUser authenticatedUser = new AuthenticatedUser(member.getId(), member.getName());
             String authenticatedUserJson = objectMapper.writeValueAsString(authenticatedUser);
-            claims.put("AuthenticetedUser", authenticatedUserJson);
-            Jwt jwt = jwtProvider.createJwt(claims);
-            UpdateRefreshToken(member.getId(), jwt.getRefreshToken());
-            return jwt;
+            NewClaims.put("AuthenticetedUser", authenticatedUserJson);
+            AccessTokenDto accessToken = jwtProvider.createAccessToken(NewClaims);
+            return accessToken;
         } catch (Exception e) {
-            return null;
+            throw new InvalidRefreshTokenException(ErrorCode.INVALID_RefreshToken);
         }
     }
 
@@ -108,7 +109,7 @@ public class LoginServiceImpl implements LoginService {
     /**
      * 일반 회원가입 시 아이디 중복 체크 메서드
      */
-    private void ValidateDuplicateId(JoinRequestDto form) {
+    private void ValidateDuplicateId(JoinDto form) {
         Optional.ofNullable(loginRepository.findLoginByIdAndSocial(form.getId(), "normal"))
                 .ifPresent(user -> {
                     throw new DuplicatedIDException(ErrorCode.DUPLICATED_USER_ID);

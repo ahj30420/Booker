@@ -12,8 +12,9 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
-import project.booker.controller.LoginController.dto.request.JoinRequestDto;
-import project.booker.controller.LoginController.dto.request.ReTokenRequestDto;
+import project.booker.controller.LoginController.dto.request.JoinDto;
+import project.booker.controller.LoginController.dto.request.RefreshTokenDto;
+import project.booker.controller.LoginController.dto.response.AccessTokenDto;
 import project.booker.exception.exceptions.ValidationException;
 import project.booker.service.loginService.LoginService;
 import project.booker.util.jwt.Jwt;
@@ -34,14 +35,14 @@ public class LoginController {
      * 일반 회원가입
      */
     @PostMapping("/signup")
-    public String join(@Validated @ModelAttribute JoinRequestDto joinRequestDto, BindingResult bindingResult){
+    public String join(@Validated @ModelAttribute JoinDto joinDto, BindingResult bindingResult){
 
         //회원가입 시 입력값 검증
         if(bindingResult.hasErrors()){
             sendValidationError(bindingResult);
         }
 
-        loginService.NomarlJoin(joinRequestDto);
+        loginService.NomarlJoin(joinDto);
 
         return "Join success";
     }
@@ -50,13 +51,10 @@ public class LoginController {
      * refresh 토큰으로 토큰 갱신하기
      */
     @PostMapping("/auth/refresh/token")
-    public ResponseEntity<Jwt> tokenRefresh(@RequestBody ReTokenRequestDto reTokenRequestDto){
-        Jwt jwt = loginService.refreshToken(reTokenRequestDto.getRefreshToken());
-        if(jwt == null){
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(null);
-        }
-        return ResponseEntity.ok(jwt);
+    public ResponseEntity<AccessTokenDto> tokenRefresh(@RequestBody RefreshTokenDto refreshTokenDto){
+        AccessTokenDto accessToken = loginService.refreshToken(refreshTokenDto.getRefreshToken());
+
+        return ResponseEntity.ok(accessToken);
     }
 
 

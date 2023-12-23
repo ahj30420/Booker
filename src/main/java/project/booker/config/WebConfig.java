@@ -30,7 +30,8 @@ public class WebConfig implements WebMvcConfigurer {
                 .addPathPatterns("/login");
 
         registry.addInterceptor(new JwtAuthorizationFilter(jwtProvider, objectMapper))
-                .order(2)
+                .order(3)
+                .addPathPatterns("/**")
                 .excludePathPatterns("/login", "/auth/refresh/token", "/signup");
     }
 

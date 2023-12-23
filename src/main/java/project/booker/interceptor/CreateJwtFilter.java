@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.servlet.HandlerInterceptor;
 import project.booker.dto.AuthenticatedUser;
 import project.booker.service.loginService.LoginService;
@@ -13,6 +14,7 @@ import project.booker.util.jwt.JwtProvider;
 import java.util.HashMap;
 import java.util.Map;
 
+@Slf4j
 @RequiredArgsConstructor
 public class CreateJwtFilter implements HandlerInterceptor {
 
@@ -39,10 +41,11 @@ public class CreateJwtFilter implements HandlerInterceptor {
             response.setContentType("application/json");
             response.setCharacterEncoding("UTF-8");
             response.getWriter().write(json);
-            return true;
+            log.info("CreateJwtFilter");
+            return false;
         }
 
-        return false;
+        return true;
     }
 
 }

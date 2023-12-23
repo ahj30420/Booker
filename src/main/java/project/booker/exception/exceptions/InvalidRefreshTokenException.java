@@ -6,6 +6,6 @@ import project.booker.exception.errorcode.ErrorCode;
 
 @Getter
 @AllArgsConstructor
-public class DuplicatedIDException extends RuntimeException{
+public class InvalidRefreshTokenException extends RuntimeException{
     private ErrorCode errorCode;
 }

@@ -4,8 +4,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.servlet.HandlerInterceptor;
-import project.booker.controller.LoginController.dto.request.LoginRequestDto;
+import project.booker.controller.LoginController.dto.request.LoginDto;
 import project.booker.domain.Member;
 import project.booker.dto.AuthenticatedUser;
 import project.booker.service.loginService.LoginService;
@@ -13,6 +14,7 @@ import project.booker.service.loginService.LoginService;
 import java.util.HashMap;
 import java.util.Map;
 
+@Slf4j
 @RequiredArgsConstructor
 public class VerifyUserFilter implements HandlerInterceptor {
 
@@ -28,14 +30,16 @@ public class VerifyUserFilter implements HandlerInterceptor {
 
         if(request.getMethod().equals("POST")){
             try {
-                LoginRequestDto loginRequestDto = objectMapper.readValue(request.getReader(), LoginRequestDto.class);
-                Member VerifyUser = loginService.VerifyUser(loginRequestDto);
+                LoginDto loginDto = objectMapper.readValue(request.getReader(), LoginDto.class);
+                Member VerifyUser = loginService.VerifyUser(loginDto);
+                log.info("VerifyUser_ID={}", VerifyUser.getId());
                 if (VerifyUser != null) {
                     request.setAttribute("AuthenticetedUser", new AuthenticatedUser(VerifyUser.getId(), VerifyUser.getName()));
                 } else {
                     throw new IllegalAccessException();
                 }
             } catch(Exception e){
+                log.info("Exception={}",e);
                 response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
                 response.setContentType("application/json");
                 response.setCharacterEncoding("UTF-8");
@@ -49,6 +53,7 @@ public class VerifyUserFilter implements HandlerInterceptor {
                 return false;
             }
         }
+
         return true;
     }
 }

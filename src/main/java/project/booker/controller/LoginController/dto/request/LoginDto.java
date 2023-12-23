@@ -5,7 +5,7 @@ import lombok.RequiredArgsConstructor;
 
 @Data
 @RequiredArgsConstructor
-public class LoginRequestDto {
+public class LoginDto {
 
     private String id;
     private String pw;

@@ -8,7 +8,7 @@ import lombok.Data;
 import java.time.LocalDate;
 
 @Data
-public class JoinRequestDto {
+public class JoinDto {
 
     @NotBlank
     private String id;

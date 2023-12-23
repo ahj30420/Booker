@@ -1,6 +1,5 @@
 package project.booker.exception.exception_manager;
 
-import ch.qos.logback.core.spi.ErrorCodes;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.springframework.http.HttpStatus;
@@ -29,6 +28,12 @@ public class ExceptionManager {
     @ExceptionHandler(DuplicatedIDException.class)
     public ResponseEntity<Response> DuplicatedIDException(DuplicatedIDException e){
         return new ResponseEntity(Response.error(e.getErrorCode().name(),e.getErrorCode().getMessage()), e.getErrorCode().getStatus());
+    }
+
+    //InvalidJwtException 발생 시 작동(올바르지 않은 RefreshToken 처리)
+    @ExceptionHandler(InvalidRefreshTokenException.class)
+    public ResponseEntity<Response> InvalidRefreshTokenException(InvalidRefreshTokenException e){
+        return new ResponseEntity(Response.error(e.getErrorCode().name(), e.getErrorCode().getMessage()), e.getErrorCode().getStatus());
     }
 
 
