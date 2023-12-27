@@ -18,6 +18,11 @@ bin/
 !**/src/test/**/bin/
 
 ### IntelliJ IDEA ###
+frontend
+generated
+node_modules
+package.json
+package-lock.json
 application.properties
 .idea
 *.iws
@@ -36,8 +41,3 @@ out/
 
 ### VS Code ###
 .vscode/
-frontend\
-generated\
-node_modules\
-package.json
-package-lock.json
