@@ -18,8 +18,12 @@ bin/
 !**/src/test/**/bin/
 
 ### IntelliJ IDEA ###
+node_modules
+package.json
+package-lock.json
 build
 frontend
+generated
 application.properties
 .idea
 *.iws
