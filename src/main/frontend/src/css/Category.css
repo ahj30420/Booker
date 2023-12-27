@@ -1,0 +1,27 @@
+.ctg_btn {
+    width: 200px;
+    height: 60px;
+    border-radius: 30px;
+    font-size: 25px;
+    font-weight: 600;
+    margin-bottom: 30px;
+    background-color: white;
+    box-shadow: 2px 2px 2px 2px gray;
+    margin-right: 20px;
+}
+.ctg_btn:hover {
+    border: 3px solid #5e3fa7;
+    color: #5e3fa7;
+}
+.ctg_btn.selected {
+    background-color: #5e3fa7;
+    color: white;
+}
+@media screen and (max-width: 768px) {
+    .ctg_btn {
+        width: 120px;
+        height: 40px;
+        font-size: 14px;
+        font-weight: 600;
+    }
+}
