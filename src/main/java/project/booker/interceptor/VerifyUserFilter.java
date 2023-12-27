@@ -9,7 +9,7 @@ import org.springframework.web.servlet.HandlerInterceptor;
 import project.booker.controller.LoginController.dto.request.LoginDto;
 import project.booker.domain.Member;
 import project.booker.dto.AuthenticatedUser;
-import project.booker.service.loginService.LoginService;
+import project.booker.service.LoginService.LoginService;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -32,9 +32,8 @@ public class VerifyUserFilter implements HandlerInterceptor {
             try {
                 LoginDto loginDto = objectMapper.readValue(request.getReader(), LoginDto.class);
                 Member VerifyUser = loginService.VerifyUser(loginDto);
-                log.info("VerifyUser_ID={}", VerifyUser.getId());
                 if (VerifyUser != null) {
-                    request.setAttribute("AuthenticetedUser", new AuthenticatedUser(VerifyUser.getId(), VerifyUser.getName()));
+                    request.setAttribute("AuthenticetedUser", new AuthenticatedUser(VerifyUser.getMemberIdx(), VerifyUser.getName(), VerifyUser.getMemberProfile().getNickname()));
                 } else {
                     throw new IllegalAccessException();
                 }

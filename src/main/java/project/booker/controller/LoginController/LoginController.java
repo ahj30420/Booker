@@ -3,21 +3,16 @@ package project.booker.controller.LoginController;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.MessageSource;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import project.booker.controller.LoginController.dto.request.JoinDto;
 import project.booker.controller.LoginController.dto.request.RefreshTokenDto;
 import project.booker.controller.LoginController.dto.response.AccessTokenDto;
 import project.booker.exception.exceptions.ValidationException;
-import project.booker.service.loginService.LoginService;
-import project.booker.util.jwt.Jwt;
+import project.booker.service.LoginService.LoginService;
 
 import java.util.HashMap;
 import java.util.Locale;
@@ -35,16 +30,19 @@ public class LoginController {
      * 일반 회원가입
      */
     @PostMapping("/signup")
-    public String join(@Validated @ModelAttribute JoinDto joinDto, BindingResult bindingResult){
+    public Map<String, Long> join(@Validated @RequestBody JoinDto joinDto, BindingResult bindingResult){
 
         //회원가입 시 입력값 검증
         if(bindingResult.hasErrors()){
             sendValidationError(bindingResult);
         }
 
-        loginService.NomarlJoin(joinDto);
+        Map<String, Long> map = new HashMap<>();
 
-        return "Join success";
+        long memberIdx = loginService.NomarlJoin(joinDto);
+        map.put("idx", memberIdx);
+
+        return map;
     }
 
     /**

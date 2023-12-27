@@ -36,6 +36,11 @@ public class ExceptionManager {
         return new ResponseEntity(Response.error(e.getErrorCode().name(), e.getErrorCode().getMessage()), e.getErrorCode().getStatus());
     }
 
+    //ValidateDuplicateNickName 발생 시 작동(프로필 닉네임 중복 예외 처리)
+    @ExceptionHandler(DuplicatedNickNameException.class)
+    public ResponseEntity<Response> DuplicatedNickNameException(DuplicatedNickNameException e){
+        return new ResponseEntity(Response.error(e.getErrorCode().name(), e.getErrorCode().getMessage()), e.getErrorCode().getStatus());
+    }
 
     //--------------------------------------Inner Class-----------------------------------------------------
     

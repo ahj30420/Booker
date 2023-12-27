@@ -9,7 +9,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class AuthenticatedUser {
 
-    private String id;
+    private Long idx;
     private String name;
+    private String nickname;
 
 }

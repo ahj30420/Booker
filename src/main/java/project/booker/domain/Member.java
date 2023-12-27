@@ -6,6 +6,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Getter
@@ -13,7 +15,7 @@ import java.time.LocalDate;
 public class Member {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long member_idx;
+    private Long MemberIdx;
 
     private String id;
     private String pw;
@@ -25,6 +27,9 @@ public class Member {
     @Column(name="refreshToken")
     private String refreshToken;
     private LocalDate redate;
+
+    @OneToOne(mappedBy = "member")
+    private MemberProfile memberProfile;
 
     //----------------------------------------생성 메서드-------------------------------------------------------
     public static Member createMember(String id, String pw, String name, String email,
@@ -46,6 +51,9 @@ public class Member {
     }
 
     //--------------------------------------연관 관계 메서드-----------------------------------------------------
+    public void addMemberProfile(MemberProfile memberProfile){
+        this.memberProfile = memberProfile;
+    }
 
     //----------------------------------------비즈니스 로직------------------------------------------------------
 

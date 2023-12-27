@@ -10,8 +10,9 @@ import static org.springframework.http.HttpStatus.*;
 @Getter
 public enum ErrorCode {
 
-    DUPLICATED_USER_ID(BAD_REQUEST, "이미 사용 중인 아이디입니다."),
-    INVALID_RefreshToken(UNAUTHORIZED,"올바르지 않은 Token입니다. 다시 로그인 해주세요.");
+    DUPLICATED_USER_ID(BAD_REQUEST, "이미 사용 중인 아이디 입니다."),
+    INVALID_RefreshToken(UNAUTHORIZED,"올바르지 않은 Token입니다. 다시 로그인 해주세요."),
+    DUPLICATED_Profile_NickName(BAD_REQUEST, "이미 사용 중인 닉네임 입니다.");
 
     private HttpStatus status;
     private String message;

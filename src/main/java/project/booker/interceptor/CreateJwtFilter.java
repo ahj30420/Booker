@@ -7,7 +7,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.servlet.HandlerInterceptor;
 import project.booker.dto.AuthenticatedUser;
-import project.booker.service.loginService.LoginService;
+import project.booker.service.LoginService.LoginService;
 import project.booker.util.jwt.Jwt;
 import project.booker.util.jwt.JwtProvider;
 
@@ -35,13 +35,12 @@ public class CreateJwtFilter implements HandlerInterceptor {
             claims.put("AuthenticetedUser", authenticatedUserJson);
 
             Jwt jwt = jwtProvider.createJwt(claims);
-            loginService.UpdateRefreshToken(authenticatedUser.getId(), jwt.getRefreshToken());
+            loginService.UpdateRefreshToken(authenticatedUser.getIdx(), jwt.getRefreshToken());
 
             String json = objectMapper.writeValueAsString(jwt);
             response.setContentType("application/json");
             response.setCharacterEncoding("UTF-8");
             response.getWriter().write(json);
-            log.info("CreateJwtFilter");
             return false;
         }
 

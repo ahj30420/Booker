@@ -29,7 +29,6 @@ public class JwtAuthorizationFilter implements HandlerInterceptor {
     /**
      * 권한에 대한 인가 처리 담당 필터
      */
-
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
         if(!ContainToken(request)){
@@ -40,7 +39,8 @@ public class JwtAuthorizationFilter implements HandlerInterceptor {
         try{
             String token = getToken(request);
             AuthenticatedUser authenticatedUser = getAuthenticatedUser(token);
-            log.info("User ID={}, NAME={}", authenticatedUser.getId(), authenticatedUser.getName());
+            request.setAttribute("AuthenticatedUser", authenticatedUser);
+            log.info("User ID={}, NAME={}, NICKNAME={}", authenticatedUser.getIdx(), authenticatedUser.getName(),authenticatedUser.getNickname());
         } catch (JsonParseException e){
             log.error("JsonParseException");
             setErrorResponse(response, SC_BAD_REQUEST, "입력 오류");
