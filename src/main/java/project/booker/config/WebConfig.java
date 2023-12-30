@@ -41,7 +41,7 @@ public class WebConfig implements WebMvcConfigurer {
         registry.addInterceptor(new JwtAuthorizationFilter(jwtProvider, objectMapper))
                 .order(3)
                 .addPathPatterns("/**")
-                .excludePathPatterns("/login", "/auth/refresh/token", "/signup");
+                .excludePathPatterns("/login", "/auth/refresh/token", "/signup", "/profile", "/oauth2/code/naver");
     }
 
 }

@@ -1,8 +1,8 @@
 package project.booker.service.LoginService;
 
-import project.booker.controller.LoginController.dto.request.JoinDto;
-import project.booker.controller.LoginController.dto.request.LoginDto;
-import project.booker.controller.LoginController.dto.response.AccessTokenDto;
+import project.booker.controller.LoginController.dto.JoinDto;
+import project.booker.controller.LoginController.dto.LoginDto;
+import project.booker.controller.LoginController.dto.AccessTokenDto;
 import project.booker.domain.Member;
 
 public interface LoginService {

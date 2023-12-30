@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import project.booker.domain.social.Social;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -22,7 +23,9 @@ public class Member {
     private String name;
     private String email;
     private LocalDate birth;
-    private String social;
+
+    @Enumerated(EnumType.STRING)
+    private Social social;
 
     @Column(name="refreshToken")
     private String refreshToken;
@@ -33,7 +36,7 @@ public class Member {
 
     //----------------------------------------생성 메서드-------------------------------------------------------
     public static Member createMember(String id, String pw, String name, String email,
-                                      LocalDate birth, String social, LocalDate redate){
+                                      LocalDate birth, Social social, LocalDate redate){
         Member member = new Member();
         member.id = id;
         member.pw = pw;

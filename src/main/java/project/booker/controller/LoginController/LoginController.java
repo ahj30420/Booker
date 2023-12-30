@@ -8,9 +8,9 @@ import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import project.booker.controller.LoginController.dto.request.JoinDto;
-import project.booker.controller.LoginController.dto.request.RefreshTokenDto;
-import project.booker.controller.LoginController.dto.response.AccessTokenDto;
+import project.booker.controller.LoginController.dto.JoinDto;
+import project.booker.controller.LoginController.dto.RefreshTokenDto;
+import project.booker.controller.LoginController.dto.AccessTokenDto;
 import project.booker.exception.exceptions.ValidationException;
 import project.booker.service.LoginService.LoginService;
 
@@ -46,7 +46,7 @@ public class LoginController {
     }
 
     /**
-     * refresh 토큰으로 토큰 갱신하기
+     * 일반 회원 refresh 토큰으로 토큰 갱신하기
      */
     @PostMapping("/auth/refresh/token")
     public ResponseEntity<AccessTokenDto> tokenRefresh(@RequestBody RefreshTokenDto refreshTokenDto){
@@ -58,7 +58,7 @@ public class LoginController {
 
     //--------------------------------------Private Method-----------------------------------------------------
 
-    /*
+    /**
      * 검증 실패시 오류 메시지를 담아 Exception을 발생 시켜주는 함수
      */
     private void sendValidationError(BindingResult bindingResult) {

@@ -8,7 +8,7 @@ import jakarta.annotation.PostConstruct;
 import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import project.booker.controller.LoginController.dto.response.AccessTokenDto;
+import project.booker.controller.LoginController.dto.AccessTokenDto;
 
 import java.security.Key;
 import java.util.Base64;

@@ -1,4 +1,4 @@
-package project.booker.controller.ProfileController.dto.request;
+package project.booker.controller.ProfileController.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

@@ -23,7 +23,8 @@ public class CreateJwtFilter implements HandlerInterceptor {
     private final JwtProvider jwtProvider;
 
     /**
-     * 정상적으로 회원 인증이 되었다면 JWT 생성하여 클라이언트에게 보내준다.
+     * JWT 발급
+     * 1. 검증된 회원 정보로 JWT 발급
      */
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
@@ -31,8 +32,7 @@ public class CreateJwtFilter implements HandlerInterceptor {
 
         if(authenticatedUser != null){
             Map<String, Object> claims = new HashMap<>();
-            String authenticatedUserJson = objectMapper.writeValueAsString(authenticatedUser);
-            claims.put("AuthenticetedUser", authenticatedUserJson);
+            claims.put("AuthenticetedUser", authenticatedUser);
 
             Jwt jwt = jwtProvider.createJwt(claims);
             loginService.UpdateRefreshToken(authenticatedUser.getIdx(), jwt.getRefreshToken());

@@ -6,7 +6,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.servlet.HandlerInterceptor;
-import project.booker.controller.LoginController.dto.request.LoginDto;
+import project.booker.controller.LoginController.dto.LoginDto;
 import project.booker.domain.Member;
 import project.booker.dto.AuthenticatedUser;
 import project.booker.service.LoginService.LoginService;
@@ -23,7 +23,9 @@ public class VerifyUserFilter implements HandlerInterceptor {
 
     /**
      * 로그인 정보로 회원 인증
-     * 인증 실패시 400 Status 반환(Redirect 주소 보내줌)
+     * 1. 입력받은 ID,PW로 회원 검증
+     * 2. JWT 발급을 위해 인증된 회원 정보를 request에 담아준다.
+     * 3. 검증 실패시 재로그인 요청(login 페이지로 이동)
      */
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {

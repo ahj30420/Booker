@@ -59,7 +59,7 @@ public class JwtAuthorizationFilter implements HandlerInterceptor {
 
     //--------------------------------------Private Method-----------------------------------------------------
 
-    /**
+     /**
      * 예외 발생시 response에 Status, 오류 메시지 설정 함수
      */
     private void setErrorResponse(HttpServletResponse response, int Status, String message) throws IOException {

@@ -1,4 +1,4 @@
-package project.booker.controller.LoginController.dto.request;
+package project.booker.controller.LoginController.dto;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;

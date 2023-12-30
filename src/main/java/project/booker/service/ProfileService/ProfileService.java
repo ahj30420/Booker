@@ -1,9 +1,15 @@
 package project.booker.service.ProfileService;
 
-import project.booker.controller.ProfileController.dto.request.ProfileDto;
-import project.booker.controller.ProfileController.dto.request.UploadImgDto;
+import project.booker.controller.ProfileController.dto.ProfileDto;
+import project.booker.controller.ProfileController.dto.UploadImgDto;
+import project.booker.util.jwt.Jwt;
+
+import java.util.Map;
 
 public interface ProfileService {
-    void save(Long memberIdx, ProfileDto profileDto, UploadImgDto uploadImgDto);
+
+    Map<String, Object> save(Long memberIdx, ProfileDto profileDto, UploadImgDto uploadImgDto);
+
     String getStoreImgName(Long MemberIdx);
+
 }

@@ -5,10 +5,11 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import project.booker.controller.LoginController.dto.request.LoginDto;
-import project.booker.controller.LoginController.dto.response.AccessTokenDto;
+import project.booker.controller.LoginController.dto.LoginDto;
+import project.booker.controller.LoginController.dto.AccessTokenDto;
 import project.booker.domain.Member;
-import project.booker.controller.LoginController.dto.request.JoinDto;
+import project.booker.controller.LoginController.dto.JoinDto;
+import project.booker.domain.social.Social;
 import project.booker.dto.AuthenticatedUser;
 import project.booker.exception.exceptions.DuplicatedIDException;
 import project.booker.exception.exceptions.InvalidRefreshTokenException;
@@ -49,7 +50,7 @@ public class LoginServiceImpl implements LoginService {
         String name = joinDto.getName();
         String email = joinDto.getEmail();
         LocalDate birth = joinDto.getBirth();
-        String social = "normal";
+        Social social = Social.NORMAL;
         LocalDate date = LocalDate.now();
 
         Member member = Member.createMember(id,pw,name,email,birth,social,date);
@@ -65,7 +66,7 @@ public class LoginServiceImpl implements LoginService {
     @Transactional
     public Member VerifyUser(LoginDto loginDto) {
 
-        Member VerifyUser = loginRepository.findLoginByIdAndSocial(loginDto.getId(),"normal");
+        Member VerifyUser = loginRepository.findLoginByIdAndSocial(loginDto.getId(),Social.NORMAL);
         if(VerifyUser == null || !bCryptPasswordEncoder.matches(loginDto.getPw(), VerifyUser.getPw())){
             return null;
         }
@@ -89,6 +90,9 @@ public class LoginServiceImpl implements LoginService {
 
     /**
      * refreshToken으로 accessToken 갱신하기
+     * 1. refeshToken 유효성 검사
+     * 2. refresToken으로 회원 조회
+     * 3. 조회된 회원 정보로 새로운 AccessToken 발급
      */
     public AccessTokenDto refreshToken(String refreshToken){
         try{
@@ -116,7 +120,7 @@ public class LoginServiceImpl implements LoginService {
      * 일반 회원가입 시 아이디 중복 체크 메서드
      */
     private void ValidateDuplicateId(JoinDto form) {
-        Optional.ofNullable(loginRepository.findDuplicatedIDByIdAndSocial(form.getId(), "normal"))
+        Optional.ofNullable(loginRepository.findDuplicatedIDByIdAndSocial(form.getId(), Social.NORMAL))
                 .ifPresent(user -> {
                     throw new DuplicatedIDException(ErrorCode.DUPLICATED_USER_ID);
                 });

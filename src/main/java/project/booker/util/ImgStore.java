@@ -4,7 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
-import project.booker.controller.ProfileController.dto.request.UploadImgDto;
+import project.booker.controller.ProfileController.dto.UploadImgDto;
 
 import java.io.File;
 import java.io.IOException;

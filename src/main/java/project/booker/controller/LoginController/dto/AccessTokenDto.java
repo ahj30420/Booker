@@ -1,4 +1,4 @@
-package project.booker.controller.LoginController.dto.response;
+package project.booker.controller.LoginController.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
