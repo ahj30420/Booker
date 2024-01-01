@@ -3,12 +3,12 @@ package project.booker.controller.OauthController;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
+import project.booker.controller.OauthController.dto.GoogleCode;
 import project.booker.controller.OauthController.dto.NaverCode;
 import project.booker.domain.Member;
-import project.booker.dto.AuthenticatedUser;
-import project.booker.dto.NaverTokens;
-import project.booker.dto.NaverUserInfo;
+import project.booker.dto.*;
 import project.booker.service.LoginService.LoginService;
+import project.booker.service.OauthService.GoogleOauthService;
 import project.booker.service.OauthService.NaverOauthService;
 import project.booker.util.jwt.Jwt;
 import project.booker.util.jwt.JwtProvider;
@@ -18,24 +18,25 @@ import java.util.Map;
 
 @Slf4j
 @RestController
-@RequestMapping("/oauth2")
+@RequestMapping("/oauth2/code")
 @RequiredArgsConstructor
 public class OauthController {
 
     private final NaverOauthService naverOauthService;
+    private final GoogleOauthService googleOauthService;
     private final LoginService loginService;
     private final JwtProvider jwtProvider;
 
     /**
      * 네이버 소셜 로그인
-     * 1. Client에게 Code 받기
+     * 1. Client에게 Code, State 받기
      * 2. Code로 네이버의 AccessToken 발급
      * 3. AccessToken으로 회원 정보 조회
      * 4. 조회한 정보로 회원가입(이미 회원일 경우 가입 X)
      * 5-1. 회원가입 후 프로필 등록을 위해 회원 idx 반환(신규 회원으로 회원가입 했을 경우)
      * 5-2. 기존 회원일 경우 프로필 등록 과정이 필요하지 않으므로 JWT를 바로 발급해준다.(기존 회원일 경우)
      */
-    @PostMapping("/code/naver")
+    @PostMapping("/naver")
     public Map<String, String> Oauth2LoginNaver(@RequestBody NaverCode naverCode){
 
         Map<String, String> result = new HashMap<>();
@@ -55,7 +56,6 @@ public class OauthController {
         }
 
         Jwt jwt = createJwt(member);
-        loginService.UpdateRefreshToken(member.getMemberIdx(), jwt.getRefreshToken());
 
         result.put("accessToken", jwt.getAccessToken());
         result.put("refreshToken", jwt.getRefreshToken());
@@ -63,6 +63,41 @@ public class OauthController {
         return result;
     }
 
+
+    /**
+     * 구글 소셜 로그인
+     * 1. Client에게 Code 받기
+     * 2. Code로 구글의 AccessToken 발급
+     * 3. AccessToken으로 회원 정보 조회
+     * 4. 조회한 정보로 회원가입(이미 회원일 경우 가입 X)
+     * 5-1. 회원가입 후 프로필 등록을 위해 회원 idx 반환(신규 회원으로 회원가입 했을 경우)
+     * 5-2. 기존 회원일 경우 프로필 등록 과정이 필요하지 않으므로 JWT를 바로 발급해준다.(기존 회원일 경우)
+     */
+    @PostMapping("/google")
+    public Map<String, Object> Oauth2LoginGoogle(@RequestBody GoogleCode googleCode){
+
+        Map<String, Object> result = new HashMap<>();
+
+        String code = googleCode.getCode();
+
+        GoogleTokens googleTokens = googleOauthService.getGoogleToken(code);
+        GoogleUserInfo googleUserInfo = googleOauthService.getGoogleInfo(googleTokens);
+
+        Map<String, Object> joinMap = googleOauthService.GoogleJoin(googleUserInfo);
+        Member member = (Member) joinMap.get("member");
+
+        if((Boolean) joinMap.get("isNewMember")){
+            result.put("idx", member.getMemberIdx().toString());
+            return result;
+        }
+
+        Jwt jwt = createJwt(member);
+
+        result.put("accessToken", jwt.getAccessToken());
+        result.put("refreshToken", jwt.getRefreshToken());
+
+        return result;
+    }
 
     //--------------------------------------Private Method-----------------------------------------------------
 
@@ -77,6 +112,7 @@ public class OauthController {
         claims.put("AuthenticetedUser", authenticatedUser);
 
         Jwt jwt = jwtProvider.createJwt(claims);
+        loginService.UpdateRefreshToken(member.getMemberIdx(), jwt.getRefreshToken());
 
         return jwt;
     }

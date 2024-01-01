@@ -135,7 +135,6 @@ public class NaverOauthServiceImpl implements NaverOauthService {
      * 2. 신규 회원이라면 회원가입 후 회원정보 + "신규회원 O" 반환
      * 3. 기존 회원이라면 회원정보 + "신규회원 X" 반환 (회원 가입 X)
      */
-
     @Override
     public Map<String, Object> NaverJoin(NaverUserInfo naverUserInfo) {
         Member member = loginRepository.findMemberIdById(naverUserInfo.getId());
