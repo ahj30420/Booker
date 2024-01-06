@@ -41,20 +41,24 @@ public class JwtAuthorizationFilter implements HandlerInterceptor {
             AuthenticatedUser authenticatedUser = getAuthenticatedUser(token);
             request.setAttribute("AuthenticatedUser", authenticatedUser);
             log.info("User ID={}, NAME={}, NICKNAME={}", authenticatedUser.getIdx(), authenticatedUser.getName(),authenticatedUser.getNickname());
+            return true;
         } catch (JsonParseException e){
             log.error("JsonParseException");
             setErrorResponse(response, SC_BAD_REQUEST, "입력 오류");
+            return false;
         } catch (SignatureException | MalformedJwtException | UnsupportedJwtException e){
             log.error("JwtException");
             setErrorResponse(response, SC_UNAUTHORIZED, "인증 오류");
+            return false;
         } catch (ExpiredJwtException e){
             log.error("JwtTokenExpired");
             setErrorResponse(response, SC_FORBIDDEN, "토큰이 만료 되었습니다.");
+            return false;
         } catch (AuthorizationServiceException e){
             log.error("AuthorizationException");
             setErrorResponse(response, SC_UNAUTHORIZED, "권한이 없습니다.");
+            return false;
         }
-        return true;
     }
 
     //--------------------------------------Private Method-----------------------------------------------------
@@ -97,7 +101,12 @@ public class JwtAuthorizationFilter implements HandlerInterceptor {
      */
     private AuthenticatedUser getAuthenticatedUser(String token) throws JsonProcessingException {
         Claims claims = jwtProvider.getClaims(token);
-        String authenticatedUserJson = claims.get("AuthenticetedUser", String.class);
-        return objectMapper.readValue(authenticatedUserJson, AuthenticatedUser.class);
+        Map<String, Object> authenticatedUserClaim = (Map<String, Object>) claims.get("AuthenticetedUser");
+
+        Long idx = ((Number) authenticatedUserClaim.get("idx")).longValue();
+        String name = (String) authenticatedUserClaim.get("name");
+        String nickname = (String) authenticatedUserClaim.get("nickname");
+
+        return new AuthenticatedUser(idx, name, nickname);
     }
 }

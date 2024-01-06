@@ -35,7 +35,8 @@ public class VerifyUserFilter implements HandlerInterceptor {
                 LoginDto loginDto = objectMapper.readValue(request.getReader(), LoginDto.class);
                 Member VerifyUser = loginService.VerifyUser(loginDto);
                 if (VerifyUser != null) {
-                    request.setAttribute("AuthenticetedUser", new AuthenticatedUser(VerifyUser.getMemberIdx(), VerifyUser.getName(), VerifyUser.getMemberProfile().getNickname()));
+                    request.setAttribute("AuthenticetedUser", new AuthenticatedUser(VerifyUser.getMemberProfile().getProfileIdx(), VerifyUser.getName(), VerifyUser.getMemberProfile().getNickname()));
+                    request.setAttribute("MemberIdx", VerifyUser.getMemberIdx());
                 } else {
                     throw new IllegalAccessException();
                 }

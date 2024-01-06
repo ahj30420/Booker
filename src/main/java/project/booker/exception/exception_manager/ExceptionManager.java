@@ -42,6 +42,17 @@ public class ExceptionManager {
         return new ResponseEntity(Response.error(e.getErrorCode().name(), e.getErrorCode().getMessage()), e.getErrorCode().getStatus());
     }
 
+    //CodeException 발생 시 작동(OAuth2.0 올바르지 않은 Code 처리)
+    @ExceptionHandler(CodeException.class)
+    public ResponseEntity<Response> CodeException(CodeException e){
+        return new ResponseEntity<>(Response.error(e.getErrorCode().name(), e.getErrorCode().getMessage()), e.getErrorCode().getStatus());
+    }
+
+    //InvalidAccessToken 발시 시 작동(OAuth2.0 올바르지 않은 AccessToken 처리) 
+    @ExceptionHandler(InvalidAccessToken.class)
+    public ResponseEntity<Response> InvalidAccessToken(InvalidAccessToken e){
+        return new ResponseEntity<>(Response.error(e.getErrorCode().name(), e.getErrorCode().getMessage()), e.getErrorCode().getStatus());
+    }
     //--------------------------------------Inner Class-----------------------------------------------------
     
     /**

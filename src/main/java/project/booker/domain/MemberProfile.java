@@ -7,17 +7,23 @@ import lombok.NoArgsConstructor;
 import project.booker.domain.embedded.Interest;
 import project.booker.domain.embedded.UploadImg;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class MemberProfile {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long ProfileIdx;
+    private Long profileIdx;
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_idx")
     private Member member;
+
+    @OneToMany(mappedBy = "memberProfile")
+    private List<Book> books = new ArrayList<>();
 
     private String nickname;
     private String intro;

@@ -1,7 +1,5 @@
 package project.booker.service.OauthService;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
@@ -14,9 +12,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import project.booker.domain.Member;
-import project.booker.domain.social.Social;
+import project.booker.domain.Enum.Social;
 import project.booker.dto.GoogleTokens;
 import project.booker.dto.GoogleUserInfo;
+import project.booker.exception.errorcode.ErrorCode;
+import project.booker.exception.exceptions.CodeException;
+import project.booker.exception.exceptions.InvalidAccessToken;
 import project.booker.repository.LoginRepository;
 
 import java.time.LocalDate;
@@ -52,7 +53,7 @@ public class GoogleOauthServiceImpl implements GoogleOauthService{
         ObjectMapper objectMapper = new ObjectMapper();
 
         HttpHeaders httpHeaders = new HttpHeaders();
-        httpHeaders.add("Content", "application/json");
+        httpHeaders.add("Content-Type", "application/json");
 
         Map<String, String> params = new HashMap<>();
         params.put("grant_type", "authorization_code");
@@ -74,10 +75,8 @@ public class GoogleOauthServiceImpl implements GoogleOauthService{
 
         try{
             googleTokens = objectMapper.readValue(accessTokenResponse.getBody(), GoogleTokens.class);
-        } catch (JsonMappingException e) {
-            e.printStackTrace();
-        } catch (JsonProcessingException e) {
-            e.printStackTrace();
+        } catch (Exception e) {
+            throw new CodeException(ErrorCode.INVALID_CODE);
         }
 
         return googleTokens;
@@ -107,18 +106,18 @@ public class GoogleOauthServiceImpl implements GoogleOauthService{
         );
 
         JsonNode jsonNode = null;
+        String id = null;
+        String email = null;
+        String name = null;
 
         try{
             jsonNode = objectMapper.readTree(response.getBody());
-        } catch (JsonMappingException e) {
-            e.printStackTrace();
-        } catch (JsonProcessingException e) {
-            e.printStackTrace();
+            id = jsonNode.get("id").asText();
+            email = jsonNode.get("email").asText();
+            name = jsonNode.get("name").asText();
+        } catch (Exception e){
+            throw new InvalidAccessToken(ErrorCode.INVALID_ACCESSTOKEN);
         }
-
-        String id = jsonNode.get("id").asText();
-        String email = jsonNode.get("email").asText();
-        String name = jsonNode.get("name").asText();
 
         GoogleUserInfo googleUserInfo = new GoogleUserInfo(id,email,name);
 
@@ -133,7 +132,7 @@ public class GoogleOauthServiceImpl implements GoogleOauthService{
      */
     @Override
     public Map<String, Object> GoogleJoin(GoogleUserInfo googleUserInfo) {
-        Member member = loginRepository.findMemberIdById(googleUserInfo.getId());
+        Member member = loginRepository.findMemberIdByIdAndSocial(googleUserInfo.getId(), Social.GOOGLE);
 
         Map<String, Object> result = new HashMap<>();
         boolean isNewMember = false;
@@ -149,6 +148,13 @@ public class GoogleOauthServiceImpl implements GoogleOauthService{
             loginRepository.save(NewGoogleMember);
 
             result.put("member", NewGoogleMember);
+            result.put("isNewMember", isNewMember);
+
+            return result;
+        } else if(member.getMemberProfile() == null){
+            isNewMember = true;
+
+            result.put("member", member);
             result.put("isNewMember", isNewMember);
 
             return result;

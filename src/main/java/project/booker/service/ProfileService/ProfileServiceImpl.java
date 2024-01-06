@@ -9,13 +9,11 @@ import project.booker.domain.Member;
 import project.booker.domain.MemberProfile;
 import project.booker.domain.embedded.Interest;
 import project.booker.domain.embedded.UploadImg;
-import project.booker.domain.social.Social;
-import project.booker.dto.AuthenticatedUser;
+import project.booker.domain.Enum.Social;
 import project.booker.exception.errorcode.ErrorCode;
 import project.booker.exception.exceptions.DuplicatedNickNameException;
 import project.booker.repository.LoginRepository;
 import project.booker.repository.ProfileRepository;
-import project.booker.util.jwt.Jwt;
 import project.booker.util.jwt.JwtProvider;
 
 import java.util.HashMap;
@@ -63,7 +61,7 @@ public class ProfileServiceImpl implements ProfileService{
         }
 
         result.put("social", member.getSocial());
-        result.put("idx", memberIdx);
+        result.put("idx", memberProfile.getProfileIdx());
         result.put("name", member.getName());
         result.put("nickname", nickname);
 
@@ -88,7 +86,7 @@ public class ProfileServiceImpl implements ProfileService{
     private void ValidateDuplicateNickName(String nickname) {
         Optional.ofNullable(profileRepository.findProfileByNickname(nickname))
                 .ifPresent(user ->{
-                    throw new DuplicatedNickNameException(ErrorCode.DUPLICATED_Profile_NickName);
+                    throw new DuplicatedNickNameException(ErrorCode.DUPLICATED_PROFILE_NICKNAME);
                 });
     }
 

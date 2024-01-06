@@ -29,13 +29,14 @@ public class CreateJwtFilter implements HandlerInterceptor {
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
         AuthenticatedUser authenticatedUser = (AuthenticatedUser) request.getAttribute("AuthenticetedUser");
+        Long memberIdx = (Long) request.getAttribute("MemberIdx");
 
         if(authenticatedUser != null){
             Map<String, Object> claims = new HashMap<>();
             claims.put("AuthenticetedUser", authenticatedUser);
 
             Jwt jwt = jwtProvider.createJwt(claims);
-            loginService.UpdateRefreshToken(authenticatedUser.getIdx(), jwt.getRefreshToken());
+            loginService.UpdateRefreshToken(memberIdx, jwt.getRefreshToken());
 
             String json = objectMapper.writeValueAsString(jwt);
             response.setContentType("application/json");
@@ -44,7 +45,7 @@ public class CreateJwtFilter implements HandlerInterceptor {
             return false;
         }
 
-        return true;
+        return false;
     }
 
 }

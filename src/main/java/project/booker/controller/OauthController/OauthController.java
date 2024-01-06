@@ -106,7 +106,7 @@ public class OauthController {
      * 1. 회원 정보 중 idx, 이름, 닉네임 정보로 JWT를 발급한다.
      */
     private Jwt createJwt(Member member) {
-        AuthenticatedUser authenticatedUser = new AuthenticatedUser(member.getMemberIdx(),member.getName(),member.getMemberProfile().getNickname());
+        AuthenticatedUser authenticatedUser = new AuthenticatedUser(member.getMemberProfile().getProfileIdx(), member.getName(), member.getMemberProfile().getNickname());
 
         Map<String, Object> claims = new HashMap<>();
         claims.put("AuthenticetedUser", authenticatedUser);

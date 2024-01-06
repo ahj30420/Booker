@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import project.booker.controller.ProfileController.dto.ProfileDto;
 import project.booker.controller.ProfileController.dto.UploadImgDto;
-import project.booker.domain.social.Social;
+import project.booker.domain.Enum.Social;
 import project.booker.dto.AuthenticatedUser;
 import project.booker.exception.exceptions.ValidationException;
 import project.booker.service.LoginService.LoginService;
@@ -71,7 +71,7 @@ public class ProfileContoller {
         }
 
         Jwt jwt = createJwt(socialMap);
-        loginService.UpdateRefreshToken((Long) socialMap.get("idx"), jwt.getRefreshToken());
+        loginService.UpdateRefreshToken(memberIdx, jwt.getRefreshToken());
 
         result.put("accessToken", jwt.getAccessToken());
         result.put("refreshToken", jwt.getRefreshToken());

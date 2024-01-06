@@ -9,7 +9,7 @@ import project.booker.controller.LoginController.dto.LoginDto;
 import project.booker.controller.LoginController.dto.AccessTokenDto;
 import project.booker.domain.Member;
 import project.booker.controller.LoginController.dto.JoinDto;
-import project.booker.domain.social.Social;
+import project.booker.domain.Enum.Social;
 import project.booker.dto.AuthenticatedUser;
 import project.booker.exception.exceptions.DuplicatedIDException;
 import project.booker.exception.exceptions.InvalidRefreshTokenException;
@@ -66,7 +66,7 @@ public class LoginServiceImpl implements LoginService {
     @Transactional
     public Member VerifyUser(LoginDto loginDto) {
 
-        Member VerifyUser = loginRepository.findLoginByIdAndSocial(loginDto.getId(),Social.NORMAL);
+        Member VerifyUser = loginRepository.findMemberIdByIdAndSocial(loginDto.getId(),Social.NORMAL);
         if(VerifyUser == null || !bCryptPasswordEncoder.matches(loginDto.getPw(), VerifyUser.getPw())){
             return null;
         }
@@ -110,7 +110,7 @@ public class LoginServiceImpl implements LoginService {
             AccessTokenDto accessToken = jwtProvider.createAccessToken(NewClaims);
             return accessToken;
         } catch (Exception e) {
-            throw new InvalidRefreshTokenException(ErrorCode.INVALID_RefreshToken);
+            throw new InvalidRefreshTokenException(ErrorCode.INVALID_REFRESHTOKEN);
         }
     }
 

@@ -1,7 +1,5 @@
 package project.booker.service.OauthService;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
@@ -16,12 +14,13 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 import project.booker.domain.Member;
-import project.booker.domain.social.Social;
-import project.booker.dto.AuthenticatedUser;
+import project.booker.domain.Enum.Social;
 import project.booker.dto.NaverTokens;
 import project.booker.dto.NaverUserInfo;
+import project.booker.exception.errorcode.ErrorCode;
+import project.booker.exception.exceptions.CodeException;
+import project.booker.exception.exceptions.InvalidAccessToken;
 import project.booker.repository.LoginRepository;
-import project.booker.util.jwt.Jwt;
 import project.booker.util.jwt.JwtProvider;
 
 import java.time.LocalDate;
@@ -77,10 +76,9 @@ public class NaverOauthServiceImpl implements NaverOauthService {
         NaverTokens naverTokens = null;
         try{
             naverTokens = mapper.readValue(accessTokenResponse.getBody(), NaverTokens.class);
-        } catch (JsonMappingException e) {
+        } catch (Exception e) {
             e.printStackTrace();
-        } catch (JsonProcessingException e) {
-            e.printStackTrace();
+            throw new CodeException(ErrorCode.INVALID_CODE);
         }
 
         return naverTokens;
@@ -114,10 +112,8 @@ public class NaverOauthServiceImpl implements NaverOauthService {
         JsonNode jsonNode = null;
         try {
              jsonNode = mapper.readTree(response.getBody());
-        } catch (JsonMappingException e) {
-            e.printStackTrace();
-        } catch (JsonProcessingException e) {
-            e.printStackTrace();
+        } catch (Exception e){
+            throw new InvalidAccessToken(ErrorCode.INVALID_ACCESSTOKEN);
         }
 
         String id = jsonNode.get("response").get("id").asText();
@@ -137,7 +133,7 @@ public class NaverOauthServiceImpl implements NaverOauthService {
      */
     @Override
     public Map<String, Object> NaverJoin(NaverUserInfo naverUserInfo) {
-        Member member = loginRepository.findMemberIdById(naverUserInfo.getId());
+        Member member = loginRepository.findMemberIdByIdAndSocial(naverUserInfo.getId(), Social.NAVER);
 
         Map<String, Object> result = new HashMap<>();
         boolean isNewMember = false;
@@ -153,6 +149,13 @@ public class NaverOauthServiceImpl implements NaverOauthService {
             loginRepository.save(NewNaverMember);
 
             result.put("member", NewNaverMember);
+            result.put("isNewMember", isNewMember);
+
+            return result;
+        } else if(member.getMemberProfile() == null){
+            isNewMember = true;
+
+            result.put("member", member);
             result.put("isNewMember", isNewMember);
 
             return result;
