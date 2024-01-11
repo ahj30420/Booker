@@ -10,6 +10,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
@@ -23,6 +24,7 @@ import project.booker.exception.exceptions.InvalidAccessToken;
 import project.booker.repository.LoginRepository;
 import project.booker.util.jwt.JwtProvider;
 
+import java.security.SecureRandom;
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
@@ -30,6 +32,7 @@ import java.util.UUID;
 
 @Slf4j
 @Service
+@Transactional
 @RequiredArgsConstructor
 public class NaverOauthServiceImpl implements NaverOauthService {
 
@@ -143,7 +146,7 @@ public class NaverOauthServiceImpl implements NaverOauthService {
             String id =  naverUserInfo.getId();
             String email = naverUserInfo.getEmail();
             String name = naverUserInfo.getName();
-            String pw = UUID.randomUUID().toString();
+            String pw = generateRandomString(20);
             LocalDate redate = LocalDate.now();
             Member NewNaverMember = Member.createMember(id,pw,name,email,null, Social.NAVER, redate);
             loginRepository.save(NewNaverMember);
@@ -165,6 +168,23 @@ public class NaverOauthServiceImpl implements NaverOauthService {
         result.put("isNewMember", isNewMember);
 
         return result;
+    }
+
+    //--------------------------------------Private Method-----------------------------------------------------
+
+    // 무작위 문자열 생성
+    private static String generateRandomString(int length) {
+        String characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_-+="; // 사용할 문자들
+        SecureRandom random = new SecureRandom();
+        StringBuilder sb = new StringBuilder(length);
+
+        // 지정된 길이만큼 반복하여 무작위 문자열 생성
+        for (int i = 0; i < length; i++) {
+            int randomIndex = random.nextInt(characters.length());
+            sb.append(characters.charAt(randomIndex));
+        }
+
+        return sb.toString();
     }
 
 }

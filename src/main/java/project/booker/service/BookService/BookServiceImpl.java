@@ -2,20 +2,33 @@ package project.booker.service.BookService;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import project.booker.controller.BookController.dto.BookDetail;
+import project.booker.controller.BookController.dto.BookList;
+import project.booker.controller.BookController.dto.SimpleReport;
 import project.booker.domain.Book;
+import project.booker.domain.Enum.Sharing;
 import project.booker.domain.MemberProfile;
 import project.booker.domain.Enum.Progress;
 import project.booker.domain.Enum.SaleState;
-import project.booker.repository.BookRepository;
+import project.booker.domain.Report;
+import project.booker.dto.NewBook;
+import project.booker.exception.errorcode.ErrorCode;
+import project.booker.exception.exceptions.NotExistBookException;
+import project.booker.repository.BookRepository.BookRepository;
 import project.booker.repository.ProfileRepository;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 @Slf4j
 @Service
+@Transactional
 @RequiredArgsConstructor
 public class BookServiceImpl implements BookService{
 
@@ -28,37 +41,79 @@ public class BookServiceImpl implements BookService{
      * 판매 가능 여부는 기본 값으로 IMP(불가능) 설정
      */
     @Override
-    public void registerMyBook(Long profileIdx, String isbn13) {
-        MemberProfile memberProfile = profileRepository.findById(profileIdx).get();
-        Book book = Book.createBook(memberProfile, isbn13, Progress.BEFORE, SaleState.IMP);
+    public void registerMyBook(String profileId, String isbn13, String img) {
+
+        MemberProfile memberProfile = profileRepository.findByProfileId(profileId);
+        Book book = Book.createBook(memberProfile, isbn13, Progress.BEFORE, SaleState.IMP, img);
 
         bookRepository.save(book);
     }
 
     /**
      * 책 상세페이지(독서 현황 및 독후감 유무 정보 조회)
-     *  1. profileIdx, isbn13로 책 조회
-     *  2-1. 책이 없을 경우 false 반환
-     *  2-2. 책이 있을 경우 해당 책 정보와 true 값 반환
+     *
+     * 1. bookId로 책 정보 조회
+     * 2. 조회 된 책이 없다면 개인 서재에 해당 책이 없다는 예외 처리
+     * 3-1. 조회된 책의 주인이 현재 사용자와 같지 않다면 타인의 개인 서재 방문으로 간주하여 공개 여부가 PUBLIC인 독후감만 조회
+     * 3-2. 조회된 책의 주인이 현재 사용자와 같다면 공개 여부와 상관없이 모든 독후감 조회
+     * 4. 책의 존재 여부, 독서 현황, 독후감 정보 반환
      */
     @Override
-    public Map<String, Object> getProgressReport(Long profileIdx, String isbn13) {
+    public BookDetail searchProgressReports(String profileId, String bookId) {
 
-        Book book = bookRepository.getProgress(profileIdx, isbn13);
-        log.info("book={}", book);
+        Book book = bookRepository.findFetchByBookId(bookId);
 
-        Map<String, Object> map = new HashMap<>();
-        boolean bookExist = true;
-        if(book == null){
-            bookExist = false;
-            map.put("bookExist", bookExist);
-            return map;
+        if(book == null){ throw new NotExistBookException(ErrorCode.NotExist_Book); }
+
+        Sharing sharing = null;
+        if(!book.getMemberProfile().getProfileId().equals(profileId)){
+            sharing = Sharing.PUBLIC;
         }
 
-        map.put("book", book);
-        map.put("bookExist", bookExist);
+        List<SimpleReport> reports = bookRepository.searchProgressReports(bookId, sharing);
 
-        return map;
+        BookDetail bookDetail = new BookDetail(true, book.getProgress(), reports);
+
+        return bookDetail;
     }
 
+    /**
+     * 새로운 책인지 개인 서재에 등록된 책인지 파악
+     *
+     * 1. profileId + isbn13으로 책 조회
+     * 2-1. 책이 존재 하지 않다면 새로운 책으로 간주하고 exist = false 반환
+     * 2-2. 책이 존재하면 exist = true 와 BookId 반환
+     */
+    @Override
+    public NewBook isNewBook(String profileId, String isbn13) {
+
+        Book book = bookRepository.getBookByProfileIdAndIsbn13(profileId, isbn13);
+
+        NewBook newBook = null;
+        if(book == null){
+            newBook = new NewBook(false, null);
+            return newBook;
+        }
+
+        newBook = new NewBook(true, book.getBookId());
+        return newBook;
+    }
+
+    /**
+     * 개인 서재 목록 조회
+     * 1. 해당 사용자의 개인 서재 책 목록 조회
+     */
+    @Override
+    public Slice<Book> getBookList(String profileId, Pageable pageable) {
+        return bookRepository.getBookListByProfileId(profileId, pageable);
+    }
+
+    /**
+     * 읽는 중인 책 목록 조회
+     * 1. 사용자가 읽고 있는 책 목록 조회
+     */
+    @Override
+    public List<Book> searchReadingBooks(String profileId) {
+        return bookRepository.getReadingBooks(profileId);
+    }
 }

@@ -7,7 +7,7 @@ import project.booker.domain.Member;
 
 public interface LoginService {
 
-    Long NomarlJoin(JoinDto joinDto);
+    String NomarlJoin(JoinDto joinDto);
 
     Member VerifyUser(LoginDto loginDto);
 

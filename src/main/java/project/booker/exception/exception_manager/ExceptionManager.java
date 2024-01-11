@@ -53,6 +53,14 @@ public class ExceptionManager {
     public ResponseEntity<Response> InvalidAccessToken(InvalidAccessToken e){
         return new ResponseEntity<>(Response.error(e.getErrorCode().name(), e.getErrorCode().getMessage()), e.getErrorCode().getStatus());
     }
+
+    //NotExistBookException 발생시 작동(개인 서재에 입력 받은 책이 없을 경우)
+    @ExceptionHandler(NotExistBookException.class)
+    public ResponseEntity<Response> NotExistBook(NotExistBookException e){
+        return new ResponseEntity<>(Response.error(e.getErrorCode().name(), e.getErrorCode().getMessage()), e.getErrorCode().getStatus());
+    }
+
+
     //--------------------------------------Inner Class-----------------------------------------------------
     
     /**

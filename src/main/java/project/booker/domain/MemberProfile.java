@@ -1,5 +1,6 @@
 package project.booker.domain;
 
+import com.aventrix.jnanoid.jnanoid.NanoIdUtils;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -16,10 +17,13 @@ import java.util.List;
 public class MemberProfile {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long profileIdx;
+    private Long profilePk;
+
+    @Column(unique = true)
+    private String profileId;
 
     @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "member_idx")
+    @JoinColumn(name = "member_pk")
     private Member member;
 
     @OneToMany(mappedBy = "memberProfile")
@@ -37,6 +41,7 @@ public class MemberProfile {
     //----------------------------------------생성 메서드-------------------------------------------------------
     public static MemberProfile createMemberProfile(Member member, String nickname, String intro, UploadImg img, Interest interest){
         MemberProfile memberProfile = new MemberProfile();
+        memberProfile.profileId = NanoIdUtils.randomNanoId();
         memberProfile.addMember(member);
         memberProfile.nickname = nickname;
         memberProfile.intro = intro;

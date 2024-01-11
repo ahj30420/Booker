@@ -37,7 +37,7 @@ public class LoginServiceImpl implements LoginService {
      * 비밀번호는 보안에 중요한 개인 정보이므로 데이터베이스에 저장하기 전에 암호화!!
      */
     @Transactional
-    public Long NomarlJoin(JoinDto joinDto){
+    public String NomarlJoin(JoinDto joinDto){
 
         //아이디 중복 체크
         ValidateDuplicateId(joinDto);
@@ -57,7 +57,7 @@ public class LoginServiceImpl implements LoginService {
 
         loginRepository.save(member);
 
-        return member.getMemberIdx();
+        return member.getMemberId();
     }
 
     /**
@@ -104,7 +104,7 @@ public class LoginServiceImpl implements LoginService {
             }
 
             Map<String, Object> NewClaims = new HashMap<>();
-            AuthenticatedUser authenticatedUser = new AuthenticatedUser(member.getMemberIdx(), member.getName(),member.getMemberProfile().getNickname());
+            AuthenticatedUser authenticatedUser = new AuthenticatedUser(member.getMemberProfile().getProfileId(), member.getName(),member.getMemberProfile().getNickname());
             String authenticatedUserJson = objectMapper.writeValueAsString(authenticatedUser);
             NewClaims.put("AuthenticetedUser", authenticatedUserJson);
             AccessTokenDto accessToken = jwtProvider.createAccessToken(NewClaims);

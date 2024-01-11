@@ -29,14 +29,14 @@ public class CreateJwtFilter implements HandlerInterceptor {
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
         AuthenticatedUser authenticatedUser = (AuthenticatedUser) request.getAttribute("AuthenticetedUser");
-        Long memberIdx = (Long) request.getAttribute("MemberIdx");
+        Long memberPk = (Long) request.getAttribute("MemberPk");
 
         if(authenticatedUser != null){
             Map<String, Object> claims = new HashMap<>();
             claims.put("AuthenticetedUser", authenticatedUser);
 
             Jwt jwt = jwtProvider.createJwt(claims);
-            loginService.UpdateRefreshToken(memberIdx, jwt.getRefreshToken());
+            loginService.UpdateRefreshToken(memberPk, jwt.getRefreshToken());
 
             String json = objectMapper.writeValueAsString(jwt);
             response.setContentType("application/json");

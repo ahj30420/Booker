@@ -51,7 +51,7 @@ public class OauthController {
         Member member = (Member) joinMap.get("member");
 
         if((Boolean) joinMap.get("isNewMember")){
-            result.put("idx", member.getMemberIdx().toString());
+            result.put("memberId", member.getMemberId());
             return result;
         }
 
@@ -87,7 +87,7 @@ public class OauthController {
         Member member = (Member) joinMap.get("member");
 
         if((Boolean) joinMap.get("isNewMember")){
-            result.put("idx", member.getMemberIdx().toString());
+            result.put("memberId", member.getMemberId());
             return result;
         }
 
@@ -106,13 +106,13 @@ public class OauthController {
      * 1. 회원 정보 중 idx, 이름, 닉네임 정보로 JWT를 발급한다.
      */
     private Jwt createJwt(Member member) {
-        AuthenticatedUser authenticatedUser = new AuthenticatedUser(member.getMemberProfile().getProfileIdx(), member.getName(), member.getMemberProfile().getNickname());
+        AuthenticatedUser authenticatedUser = new AuthenticatedUser(member.getMemberProfile().getProfileId(), member.getName(), member.getMemberProfile().getNickname());
 
         Map<String, Object> claims = new HashMap<>();
         claims.put("AuthenticetedUser", authenticatedUser);
 
         Jwt jwt = jwtProvider.createJwt(claims);
-        loginService.UpdateRefreshToken(member.getMemberIdx(), jwt.getRefreshToken());
+        loginService.UpdateRefreshToken(member.getMemberPk(), jwt.getRefreshToken());
 
         return jwt;
     }

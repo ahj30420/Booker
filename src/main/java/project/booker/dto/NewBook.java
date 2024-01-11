@@ -5,12 +5,11 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
-@NoArgsConstructor
 @AllArgsConstructor
-public class AuthenticatedUser {
+@NoArgsConstructor
+public class NewBook {
 
-    private String profileId;
-    private String name;
-    private String nickname;
+    private boolean exist;
+    private String bookId;
 
 }

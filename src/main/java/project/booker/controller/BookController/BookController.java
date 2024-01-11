@@ -3,16 +3,14 @@ package project.booker.controller.BookController;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.MessageSource;
-import org.springframework.validation.BindingResult;
-import org.springframework.validation.FieldError;
-import org.springframework.validation.annotation.Validated;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.web.bind.annotation.*;
 import project.booker.controller.BookController.dto.*;
 import project.booker.domain.Book;
-import project.booker.domain.Report;
 import project.booker.dto.AuthenticatedUser;
-import project.booker.exception.exceptions.ValidationException;
+import project.booker.dto.NewBook;
 import project.booker.service.AladinAPIService.AladinAPIService;
 import project.booker.service.BookService.BookService;
 
@@ -20,17 +18,17 @@ import java.util.*;
 
 @Slf4j
 @RestController
+@RequestMapping("/book")
 @RequiredArgsConstructor
 public class BookController {
 
     private final AladinAPIService aladinAPIService;
-    private final MessageSource messageSource;
     private final BookService bookService;
 
     /**
      * 알라딘 베스트 셀러 조회
      */
-    @GetMapping("/book/bestseller")
+    @GetMapping("/bestseller")
     public ArrayList<BestSeller> bestSeller(){
         return aladinAPIService.getBestSeller();
     }
@@ -38,7 +36,7 @@ public class BookController {
     /**
      * 알라딘 책 상세 정보 조회
      */
-    @GetMapping("/book")
+    @GetMapping
     public BookInfo bookLookUp(@RequestParam("ISBN13") String isbn13){
         return aladinAPIService.BookLookUp(isbn13);
     }
@@ -48,66 +46,132 @@ public class BookController {
      * 1.AccessToken에서 profileIdx 추출
      * 2.profileIdx, isbn13으로 책 추가
      */
-    @PostMapping("/book/mybook")
-    public void registerMyBook(HttpServletRequest request, @RequestBody Isbn13 isbn13){
+    @PostMapping("/mybook")
+    public void registerMyBook(HttpServletRequest request, @RequestBody SaveBook saveBook){
 
         AuthenticatedUser user = (AuthenticatedUser) request.getAttribute("AuthenticatedUser");
-        Long profileIdx = user.getIdx();
+        String profileId = user.getProfileId();
 
-        bookService.registerMyBook(profileIdx, isbn13.getIsbn13());
+        bookService.registerMyBook(profileId, saveBook.getIsbn13(), saveBook.getImg());
     }
 
     /**
      * 책 상세페이지(독서 현황 및 독후감 유무 정보 조회)
-     *
-     * <유의 사항>
-     *     - 책 상세 페이지 종류
-     *     1. 회원이 "책 추가"하지 않은 새로운 책
-     *     2. 회원이 "책 추가"하여 관리하고 있는 책
-     *     3. 로그인 된 회원이 아닌 다른 회원의 개인 서재 책
-     * </>
-     *
-     * <로직 흐름>
-     *     1. 회원이 관리하고 있는 책인지 다른 회원의 개인 서재 책인지 구분하기 위해 profileIdx 설정
-     *     2. profileIdx와 isbn13 값으로 책 조회
-     *     3-1. 책이 존재하지 않을 경우 false값 반환
-     *     3-2. 책이 존재 할 경우 해당 책의 독서 현황, 독후감 정보, true 값을 반환
-     * </>
+     * 1. 사용자의 profileId 값과 입력 받은 bookId 값으로 독서현황 + 독후감 정보 조회
      */
-    @GetMapping("/book/progress/reports")
-    public Map<String, Object> getProgressReports(HttpServletRequest request, @ModelAttribute UserIsbn13 userIsbn13){
+    @GetMapping("/progress/reports")
+    public BookDetail searchProgressReports(HttpServletRequest request, @RequestParam("bookId") String bookId){
 
-        Long profileIdx = userIsbn13.getProfileIdx();
+        AuthenticatedUser authenticatedUser = (AuthenticatedUser) request.getAttribute("AuthenticatedUser");
+        String profileId = authenticatedUser.getProfileId();
 
-        if(profileIdx == null) {
-            AuthenticatedUser user = (AuthenticatedUser) request.getAttribute("AuthenticatedUser");
-            profileIdx = user.getIdx();
+        BookDetail bookDetail = bookService.searchProgressReports(profileId, bookId);
+
+        return bookDetail;
+    }
+
+    /**
+     * 검색을 통한 책 상세페이지 (새로운 책인지 개인 서재에 등록된 책인지 파악)
+     *
+     * 1. 사용자의 profileId와 isbn13 값으로 해당 책이 개인 서재에서 관리되고 있는지 확인
+     * 2-1. 책이 개인 서재에서 관리되고 있다면 해당 정보로 독서 현황 + 독후감 정보 조회 및 반환
+     * 2-2. 개인 서재에서 관리되지 않는 새로운 책이라면 독서 현황 + 독후감 정보 없음을 반환
+     */
+    @GetMapping("/newbook")
+    public BookDetail isNewBook(HttpServletRequest request, @RequestParam("isbn13") String isbn13){
+
+        AuthenticatedUser authenticatedUser = (AuthenticatedUser) request.getAttribute("AuthenticatedUser");
+        String profileId = authenticatedUser.getProfileId();
+
+        NewBook newBook = bookService.isNewBook(profileId, isbn13);
+
+        BookDetail bookDetail = null;
+        boolean exist = newBook.isExist();
+        if(exist){
+            String bookId = newBook.getBookId();;
+            bookDetail = bookService.searchProgressReports(profileId, bookId);
+            return bookDetail;
         }
 
-        Map<String, Object> bookStateMap = bookService.getProgressReport(profileIdx, userIsbn13.getIsbn13());
+        bookDetail = new BookDetail(exist, null, null);
+        return bookDetail;
+    }
 
-        if(!(boolean)bookStateMap.get("bookExist")){
-            return bookStateMap;
+
+    /**
+     * 개인 서재 책 목록 조회
+     *
+     * @param profileId = 타인의 개인 서재 방문할 때 사용
+     * 무한 스크롤링을 위해 Slice 형식의 페이징 처리
+     *
+     * 1. 사용자의 개인 서재인지 타인의 개인 서재인지 구분
+     * 2. 개인 서재의 책 목록 조회
+     * 3. 책의 ISBN13 값으로 책 정보 조회(알라딘 API)
+     * 4. BookID + 책 이미지 반환
+     */
+    @GetMapping("/library/list")
+    public LibraryList searchBookList(HttpServletRequest request,
+                                        @PageableDefault(page = 0, size = 5) Pageable pageable,
+                                        @RequestParam(name="profileId", required = false) String profileId){
+
+        if(profileId == null) {
+            AuthenticatedUser authenticatedUser = (AuthenticatedUser) request.getAttribute("AuthenticatedUser");
+            profileId = authenticatedUser.getProfileId();
         }
 
-        Map<String, Object> result = new HashMap<>();
-        BookState bookState = new BookState();
+        Slice<Book> sliceInfo = bookService.getBookList(profileId, pageable);
+        List<Book> books = sliceInfo.getContent();
+        int nowPage = sliceInfo.getNumber();
+        boolean hasNext = sliceInfo.hasNext();
 
-        Book book = (Book) bookStateMap.get("book");
-        bookState.setProgress(book.getProgress());
-        List<Report> reports = book.getReports();
+        List<BookList> bookLists = new ArrayList<>();
+        for(int i = 0; i < books.size(); i++){
+            BookList bookList = BookList.builder()
+                    .bookId(books.get(i).getBookId())
+                    .isbn13(books.get(i).getIsbn13())
+                    .progress(books.get(i).getProgress())
+                    .saleState(books.get(i).getSaleState())
+                    .img(books.get(i).getImg())
+                    .build();
 
-        for(int i = 0; i < reports.size(); i++){
-            SimpleReport simpleReport = new SimpleReport();
-            simpleReport.setTitle(reports.get(i).getTitle());
-            simpleReport.setRedate(reports.get(i).getRedate());
-            bookState.getReports().add(simpleReport);
+            bookLists.add(bookList);
         }
 
-        result.put("bookState", bookState);
-        result.put("bookExist", bookStateMap.get("bookExist"));
+        LibraryList libraryList = new LibraryList(nowPage, hasNext, bookLists);
+        return libraryList;
+    }
 
-        return result;
+    /**
+     * 읽고 있는 책 목록 조회 (메인 페이지)
+     * 1. profileId로 사용자가 읽고 있는 책 목록 조회
+     * 2. API 형식에 맞춰 DTO로 변환
+     */
+    @GetMapping("/reading")
+    public ReadingList searchReadingBooks(HttpServletRequest request){
+
+        AuthenticatedUser authenticatedUser = (AuthenticatedUser) request.getAttribute("AuthenticatedUser");
+        String profileId = authenticatedUser.getProfileId();
+        String userName = authenticatedUser.getName();
+
+        List<Book> books = bookService.searchReadingBooks(profileId);
+        List<Reading> readings = new ArrayList<>();
+
+        for (int i = 0; i < books.size(); i++){
+            String isbn13 = books.get(i).getIsbn13();
+            BookInfo bookInfo = aladinAPIService.BookLookUp(isbn13);
+
+            Reading reading = Reading.builder()
+                    .bookId(books.get(i).getBookId())
+                    .title(bookInfo.getTitle())
+                    .description(bookInfo.getDescription())
+                    .img(books.get(i).getImg())
+                    .build();
+
+            readings.add(reading);
+        }
+
+        ReadingList readingList = new ReadingList(userName, readings);
+        return readingList;
     }
 
 }

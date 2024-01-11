@@ -1,5 +1,6 @@
 package project.booker.domain;
 
+import com.aventrix.jnanoid.jnanoid.NanoIdUtils;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -16,10 +17,13 @@ import java.util.List;
 public class Book {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long bookIdx;
+    private Long bookPk;
+
+    @Column(unique = true)
+    private String bookId;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "profile_idx")
+    @JoinColumn(name = "profile_pk")
     private MemberProfile memberProfile;
 
     @OneToMany(mappedBy = "book")
@@ -33,15 +37,19 @@ public class Book {
     @Enumerated(EnumType.STRING)
     private SaleState saleState;
 
-    //----------------------------------------생성 메서드-------------------------------------------------------
-    public static Book createBook(MemberProfile memberProfile, String isbn13, Progress progress, SaleState saleState){
-        Book books = new Book();
-        books.addProfile(memberProfile);
-        books.isbn13 = isbn13;
-        books.progress = progress;
-        books.saleState = saleState;
+    private String img;
 
-        return books;
+    //----------------------------------------생성 메서드-------------------------------------------------------
+    public static Book createBook(MemberProfile memberProfile, String isbn13, Progress progress, SaleState saleState, String img){
+        Book book = new Book();
+        book.bookId = NanoIdUtils.randomNanoId();
+        book.addProfile(memberProfile);
+        book.isbn13 = isbn13;
+        book.progress = progress;
+        book.saleState = saleState;
+        book.img = img;
+
+        return book;
     }
 
     //--------------------------------------연관 관계 메서드-----------------------------------------------------

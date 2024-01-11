@@ -9,8 +9,9 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class Isbn13 {
+public class SaveBook {
 
     private String isbn13;
+    private String img;
 
 }

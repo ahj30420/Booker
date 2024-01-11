@@ -1,17 +1,18 @@
 package project.booker.controller.BookController.dto;
 
-import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class UserIsbn13 {
+public class LibraryList {
 
-    private String isbn13;
-
-    private Long profileIdx;
+    private int nowPage;
+    private boolean hasNext;
+    private List<BookList> bookLists;
 
 }

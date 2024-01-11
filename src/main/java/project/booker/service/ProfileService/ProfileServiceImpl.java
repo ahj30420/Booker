@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import project.booker.controller.ProfileController.dto.ProfileDto;
-import project.booker.controller.ProfileController.dto.UploadImgDto;
 import project.booker.domain.Member;
 import project.booker.domain.MemberProfile;
 import project.booker.domain.embedded.Interest;
@@ -26,7 +25,6 @@ public class ProfileServiceImpl implements ProfileService{
 
     private final ProfileRepository profileRepository;
     private final LoginRepository loginRepository;
-    private final JwtProvider jwtProvider;
 
     /**
      * Member 프로필 등록
@@ -37,7 +35,7 @@ public class ProfileServiceImpl implements ProfileService{
      */
     @Override
     @Transactional
-    public Map<String, Object> save(Long memberIdx, ProfileDto profileDto, UploadImgDto uploadImgDto) {
+    public Map<String, Object> save(String memberId, ProfileDto profileDto, UploadImg uploadImg) {
 
         Map<String, Object> result = new HashMap<>();
 
@@ -48,9 +46,8 @@ public class ProfileServiceImpl implements ProfileService{
         String intro = profileDto.getIntro();
 
         Interest interest = new Interest(profileDto.getInterest1(), profileDto.getInterest2(), profileDto.getInterest3(), profileDto.getInterest4(), profileDto.getInterest5());
-        UploadImg uploadImg = new UploadImg(uploadImgDto.getRealImgName(), uploadImgDto.getStoreImgName());
 
-        Member member = loginRepository.findById(memberIdx).get();
+        Member member = loginRepository.findByMemberId(memberId);
         MemberProfile memberProfile = MemberProfile.createMemberProfile(member, nickname, intro, uploadImg, interest);
 
         profileRepository.save(memberProfile);
@@ -61,7 +58,8 @@ public class ProfileServiceImpl implements ProfileService{
         }
 
         result.put("social", member.getSocial());
-        result.put("idx", memberProfile.getProfileIdx());
+        result.put("memberPk", member.getMemberPk());
+        result.put("profileId", memberProfile.getProfileId());
         result.put("name", member.getName());
         result.put("nickname", nickname);
 
@@ -72,8 +70,8 @@ public class ProfileServiceImpl implements ProfileService{
      * 저장된 프로필 이미지 가져오기
      */
     @Transactional(readOnly = true)
-    public String getStoreImgName(Long MemberIdx) {
-        MemberProfile memberProfile = profileRepository.findById(MemberIdx).get();
+    public String getStoreImgName(String profileId) {
+        MemberProfile memberProfile = profileRepository.findByProfileId(profileId);
         return memberProfile.getImg().getStoreImgName();
     }
 

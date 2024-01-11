@@ -12,9 +12,10 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import project.booker.controller.ProfileController.dto.ProfileDto;
-import project.booker.controller.ProfileController.dto.UploadImgDto;
 import project.booker.domain.Enum.Social;
+import project.booker.domain.embedded.UploadImg;
 import project.booker.dto.AuthenticatedUser;
+import project.booker.dto.Enum.DefaultImg;
 import project.booker.exception.exceptions.ValidationException;
 import project.booker.service.LoginService.LoginService;
 import project.booker.service.ProfileService.ProfileService;
@@ -49,7 +50,7 @@ public class ProfileContoller {
      * 4-2. 소셜(네이버,구글) 회원일 경우 JWT를 발급하여 로그인 처리해준다.
      */
     @PostMapping
-    public Map<String, String> RegisterProfile(@RequestParam("idx") Long memberIdx,
+    public Map<String, String> RegisterProfile(@RequestParam("memberId") String memberId,
                                   @Validated @ModelAttribute ProfileDto profileDto,
                                   BindingResult bindingResult) throws IOException {
 
@@ -58,10 +59,11 @@ public class ProfileContoller {
             sendValidationError(bindingResult);
         }
 
+        log.info("memberId={}", memberId);
         MultipartFile ImgFile = profileDto.getImageFile();
-        UploadImgDto uploadImgDto = imgStore.storeImge(ImgFile);
+        UploadImg uploadImg = imgStore.storeImge(ImgFile, DefaultImg.PROFILE);
 
-        Map<String, Object> socialMap = profileService.save(memberIdx, profileDto, uploadImgDto);
+        Map<String, Object> socialMap = profileService.save(memberId, profileDto, uploadImg);
         Map<String, String> result = new HashMap<>();
 
         if(socialMap.get("social") == Social.NORMAL){
@@ -70,8 +72,9 @@ public class ProfileContoller {
             return result;
         }
 
+        Long memberPk = (Long)socialMap.get("memberPk");
         Jwt jwt = createJwt(socialMap);
-        loginService.UpdateRefreshToken(memberIdx, jwt.getRefreshToken());
+        loginService.UpdateRefreshToken(memberPk, jwt.getRefreshToken());
 
         result.put("accessToken", jwt.getAccessToken());
         result.put("refreshToken", jwt.getRefreshToken());
@@ -86,8 +89,8 @@ public class ProfileContoller {
     @GetMapping("/img/downloadImg")
     public Resource downloadImage(HttpServletRequest request) throws MalformedURLException {
         AuthenticatedUser authenticatedUser = (AuthenticatedUser) request.getAttribute("AuthenticatedUser");
-        Long MemberIdx = authenticatedUser.getIdx();
-        String storeImgName = profileService.getStoreImgName(MemberIdx);
+        String profileId = authenticatedUser.getProfileId();
+        String storeImgName = profileService.getStoreImgName(profileId);
         return new UrlResource("file:" + imgStore.getFullPath(storeImgName));
     }
 
@@ -110,10 +113,10 @@ public class ProfileContoller {
      * JWT 발급하기
      */
     private Jwt createJwt(Map<String, Object> socialMap) {
-        Long idx = (Long) socialMap.get("idx");
+        String profileId = (String) socialMap.get("profileId");
         String name = (String) socialMap.get("name");
         String nickname = (String) socialMap.get("nickname");
-        AuthenticatedUser authenticatedUser = new AuthenticatedUser(idx, name, nickname);
+        AuthenticatedUser authenticatedUser = new AuthenticatedUser(profileId, name, nickname);
 
         Map<String,Object> claims = new HashMap<>();
         claims.put("AuthenticetedUser", authenticatedUser);

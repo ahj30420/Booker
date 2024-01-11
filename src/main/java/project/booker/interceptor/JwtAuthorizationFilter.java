@@ -40,7 +40,7 @@ public class JwtAuthorizationFilter implements HandlerInterceptor {
             String token = getToken(request);
             AuthenticatedUser authenticatedUser = getAuthenticatedUser(token);
             request.setAttribute("AuthenticatedUser", authenticatedUser);
-            log.info("User ID={}, NAME={}, NICKNAME={}", authenticatedUser.getIdx(), authenticatedUser.getName(),authenticatedUser.getNickname());
+            log.info("User ID={}, NAME={}, NICKNAME={}", authenticatedUser.getProfileId(), authenticatedUser.getName(),authenticatedUser.getNickname());
             return true;
         } catch (JsonParseException e){
             log.error("JsonParseException");
@@ -103,10 +103,10 @@ public class JwtAuthorizationFilter implements HandlerInterceptor {
         Claims claims = jwtProvider.getClaims(token);
         Map<String, Object> authenticatedUserClaim = (Map<String, Object>) claims.get("AuthenticetedUser");
 
-        Long idx = ((Number) authenticatedUserClaim.get("idx")).longValue();
+        String pofileId = (String) authenticatedUserClaim.get("profileId");
         String name = (String) authenticatedUserClaim.get("name");
         String nickname = (String) authenticatedUserClaim.get("nickname");
 
-        return new AuthenticatedUser(idx, name, nickname);
+        return new AuthenticatedUser(pofileId, name, nickname);
     }
 }

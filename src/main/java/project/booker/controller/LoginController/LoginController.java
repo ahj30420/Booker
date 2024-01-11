@@ -30,17 +30,17 @@ public class LoginController {
      * 일반 회원가입
      */
     @PostMapping("/signup")
-    public Map<String, Long> join(@Validated @RequestBody JoinDto joinDto, BindingResult bindingResult){
+    public Map<String, String> join(@Validated @RequestBody JoinDto joinDto, BindingResult bindingResult){
 
         //회원가입 시 입력값 검증
         if(bindingResult.hasErrors()){
             sendValidationError(bindingResult);
         }
 
-        Map<String, Long> map = new HashMap<>();
+        Map<String, String> map = new HashMap<>();
 
-        long memberIdx = loginService.NomarlJoin(joinDto);
-        map.put("idx", memberIdx);
+        String memberId = loginService.NomarlJoin(joinDto);
+        map.put("memberId", memberId);
 
         return map;
     }

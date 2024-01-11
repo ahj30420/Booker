@@ -74,12 +74,13 @@ public class AladinAPIServiceImpl implements AladinAPIService{
 
             JsonNode items = jsonNode.get("item");
             for(JsonNode item: items){
+                String isbn13 = item.get("isbn13").asText();
                 String title = item.get("title").asText();
                 String cover = item.get("cover").asText();
                 String author = item.get("author").asText();
                 String publisher = item.get("publisher").asText();
 
-                BestSeller bestSeller = new BestSeller(title, cover, author, publisher);
+                BestSeller bestSeller = new BestSeller(isbn13, title, cover, author, publisher);
                 bestSellers.add(bestSeller);
             }
         } catch (JsonMappingException e) {
@@ -132,6 +133,7 @@ public class AladinAPIServiceImpl implements AladinAPIService{
 
             JsonNode item = jsonNode.get("item").get(0);
 
+            String isbn13 = item.get("isbn13").asText();
             String title = item.get("title").asText();
             String author = item.get("author").asText();
             String publisher = item.get("publisher").asText();
@@ -140,7 +142,7 @@ public class AladinAPIServiceImpl implements AladinAPIService{
             String category = item.get("categoryName").asText();
             String description = item.get("description").asText();
 
-            bookInfo = new BookInfo(title, author, publisher, pubDate, cover, category, description);
+            bookInfo = new BookInfo(isbn13, title, author, publisher, pubDate, cover, category, description);
 
         } catch (JsonMappingException e) {
             throw new RuntimeException(e);

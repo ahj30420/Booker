@@ -4,15 +4,15 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class BestSeller {
+public class ReadingList {
 
-    private String isbn13;
-    private String title;
-    private String cover;
-    private String author;
-    private String publisher;
+    private String userName;
+    private List<Reading> readingList = new ArrayList<>();
 
 }

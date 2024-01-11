@@ -9,6 +9,8 @@ public interface LoginRepository extends JpaRepository<Member, Long> {
 
     public Member findDuplicatedIDByIdAndSocial(String id, Social social);
 
+    public Member findByMemberId(String memberId);
+
     @EntityGraph(attributePaths = {"memberProfile"})
     public Member findMemberIdByIdAndSocial(String id, Social social);
 

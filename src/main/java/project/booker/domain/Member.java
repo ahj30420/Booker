@@ -1,5 +1,6 @@
 package project.booker.domain;
 
+import com.aventrix.jnanoid.jnanoid.NanoIdUtils;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -14,7 +15,10 @@ import java.time.LocalDate;
 public class Member {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long memberIdx;
+    private Long memberPk;
+
+    @Column(unique = true)
+    private String memberId;
 
     private String id;
     private String pw;
@@ -36,6 +40,7 @@ public class Member {
     public static Member createMember(String id, String pw, String name, String email,
                                       LocalDate birth, Social social, LocalDate redate){
         Member member = new Member();
+        member.memberId = NanoIdUtils.randomNanoId();
         member.id = id;
         member.pw = pw;
         member.name = name;

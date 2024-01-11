@@ -9,11 +9,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Data
-@NoArgsConstructor
 @AllArgsConstructor
-public class BookState {
+@NoArgsConstructor
+public class BookDetail {
 
+    private boolean exist;
     private Progress progress;
-    private List<SimpleReport> reports = new ArrayList<>();
+    private List<SimpleReport> simpleReports = new ArrayList<>();
 
 }
