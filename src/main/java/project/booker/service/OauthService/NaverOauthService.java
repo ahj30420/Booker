@@ -1,9 +1,7 @@
 package project.booker.service.OauthService;
 
-import project.booker.domain.Member;
-import project.booker.dto.NaverTokens;
-import project.booker.dto.NaverUserInfo;
-import project.booker.util.jwt.Jwt;
+import project.booker.controller.OauthController.dto.NaverTokens;
+import project.booker.controller.OauthController.dto.NaverUserInfo;
 
 import java.util.Map;
 

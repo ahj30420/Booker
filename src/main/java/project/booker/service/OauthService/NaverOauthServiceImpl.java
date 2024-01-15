@@ -16,8 +16,8 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 import project.booker.domain.Member;
 import project.booker.domain.Enum.Social;
-import project.booker.dto.NaverTokens;
-import project.booker.dto.NaverUserInfo;
+import project.booker.controller.OauthController.dto.NaverTokens;
+import project.booker.controller.OauthController.dto.NaverUserInfo;
 import project.booker.exception.errorcode.ErrorCode;
 import project.booker.exception.exceptions.CodeException;
 import project.booker.exception.exceptions.InvalidAccessToken;
@@ -28,7 +28,6 @@ import java.security.SecureRandom;
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 
 @Slf4j
 @Service

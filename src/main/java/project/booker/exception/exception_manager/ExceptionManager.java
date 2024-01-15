@@ -60,6 +60,12 @@ public class ExceptionManager {
         return new ResponseEntity<>(Response.error(e.getErrorCode().name(), e.getErrorCode().getMessage()), e.getErrorCode().getStatus());
     }
 
+    //InvalidProfileIdException 발생시 작동(프로필Id가 유효하지 않을 경우)
+    @ExceptionHandler(InvalidProfileIdException.class)
+    public ResponseEntity<Response> InvalidProfileId(InvalidProfileIdException e){
+        return new ResponseEntity<>(Response.error(e.getErrorCode().name(), e.getErrorCode().getMessage()), e.getErrorCode().getStatus());
+    }
+
 
     //--------------------------------------Inner Class-----------------------------------------------------
     

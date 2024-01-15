@@ -6,7 +6,7 @@ import lombok.Data;
 import org.springframework.web.multipart.MultipartFile;
 
 @Data
-public class ProfileDto {
+public class SaveProfileDto {
 
     /**
      * <조건>

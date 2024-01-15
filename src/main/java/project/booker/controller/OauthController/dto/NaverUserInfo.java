@@ -1,4 +1,4 @@
-package project.booker.dto;
+package project.booker.controller.OauthController.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

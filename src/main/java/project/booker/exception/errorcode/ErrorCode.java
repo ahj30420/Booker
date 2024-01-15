@@ -15,7 +15,8 @@ public enum ErrorCode {
     DUPLICATED_PROFILE_NICKNAME(BAD_REQUEST, "이미 사용 중인 닉네임 입니다."),
     INVALID_CODE(BAD_REQUEST, "올바르지 않은 CODE입니다. 다시 로그인 해주세요."),
     INVALID_ACCESSTOKEN(UNAUTHORIZED,"올바르지 않은 AccessToken입니다. 다시 로그인 해주세요."),
-    NotExist_Book(BAD_REQUEST, "개인 서재에 해당 책이 존재하지 않습니다.");
+    NotExist_Book(BAD_REQUEST, "개인 서재에 해당 책이 존재하지 않습니다."),
+    INVALID_PROFILEID(BAD_REQUEST, "해당 사용자의 프로필이 존재하지 않습니다.");
 
     private HttpStatus status;
     private String message;

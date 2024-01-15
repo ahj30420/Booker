@@ -9,6 +9,7 @@ import project.booker.domain.embedded.Interest;
 import project.booker.domain.embedded.UploadImg;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 @Entity
@@ -26,9 +27,6 @@ public class MemberProfile {
     @JoinColumn(name = "member_pk")
     private Member member;
 
-    @OneToMany(mappedBy = "memberProfile")
-    private List<Book> books = new ArrayList<>();
-
     private String nickname;
     private String intro;
 
@@ -37,6 +35,9 @@ public class MemberProfile {
 
     @Embedded
     private Interest interest;
+
+    @OneToMany(mappedBy = "memberProfile")
+    private List<Book> books = new ArrayList<>();
 
     //----------------------------------------생성 메서드-------------------------------------------------------
     public static MemberProfile createMemberProfile(Member member, String nickname, String intro, UploadImg img, Interest interest){
@@ -56,7 +57,5 @@ public class MemberProfile {
         this.member = member;
         member.addMemberProfile(this);
     }
-
-    //----------------------------------------비즈니스 로직------------------------------------------------------
 
 }

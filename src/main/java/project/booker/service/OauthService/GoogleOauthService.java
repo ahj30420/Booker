@@ -1,7 +1,7 @@
 package project.booker.service.OauthService;
 
-import project.booker.dto.GoogleTokens;
-import project.booker.dto.GoogleUserInfo;
+import project.booker.controller.OauthController.dto.GoogleTokens;
+import project.booker.controller.OauthController.dto.GoogleUserInfo;
 
 import java.util.Map;
 

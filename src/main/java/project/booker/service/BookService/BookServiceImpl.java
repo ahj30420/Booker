@@ -2,29 +2,24 @@ package project.booker.service.BookService;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import project.booker.controller.BookController.dto.BookDetail;
-import project.booker.controller.BookController.dto.BookList;
 import project.booker.controller.BookController.dto.SimpleReport;
 import project.booker.domain.Book;
 import project.booker.domain.Enum.Sharing;
 import project.booker.domain.MemberProfile;
 import project.booker.domain.Enum.Progress;
 import project.booker.domain.Enum.SaleState;
-import project.booker.domain.Report;
-import project.booker.dto.NewBook;
+import project.booker.controller.BookController.dto.NewBook;
 import project.booker.exception.errorcode.ErrorCode;
 import project.booker.exception.exceptions.NotExistBookException;
 import project.booker.repository.BookRepository.BookRepository;
 import project.booker.repository.ProfileRepository;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @Slf4j
 @Service

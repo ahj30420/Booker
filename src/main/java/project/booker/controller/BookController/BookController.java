@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import project.booker.controller.BookController.dto.*;
 import project.booker.domain.Book;
 import project.booker.dto.AuthenticatedUser;
-import project.booker.dto.NewBook;
+import project.booker.controller.BookController.dto.NewBook;
 import project.booker.service.AladinAPIService.AladinAPIService;
 import project.booker.service.BookService.BookService;
 
