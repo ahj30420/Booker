@@ -1,5 +1,6 @@
 package project.booker.repository;
 
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import project.booker.domain.Report;
 

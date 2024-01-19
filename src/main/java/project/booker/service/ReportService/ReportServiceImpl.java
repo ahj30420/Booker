@@ -8,9 +8,11 @@ import project.booker.controller.ReportController.dto.SaveReportDto;
 import project.booker.controller.ReportController.dto.UpdateReportDto;
 import project.booker.domain.Book;
 import project.booker.domain.Enum.Sharing;
+import project.booker.domain.MemberProfile;
 import project.booker.domain.Report;
 import project.booker.domain.embedded.UploadImg;
 import project.booker.repository.BookRepository.BookRepository;
+import project.booker.repository.PofileRepository.ProfileRepository;
 import project.booker.repository.ReportRepository;
 
 import java.time.LocalDateTime;
@@ -21,6 +23,7 @@ import java.time.LocalDateTime;
 @RequiredArgsConstructor
 public class ReportServiceImpl implements ReportService{
 
+    private final ProfileRepository profileRepository;
     private final BookRepository bookRepository;
     private final ReportRepository reportRepository;
 
@@ -77,4 +80,5 @@ public class ReportServiceImpl implements ReportService{
     public void deleteReport(String reportId) {
         reportRepository.deleteByReportId(reportId);
     }
+
 }

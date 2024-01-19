@@ -32,7 +32,7 @@ public class JwtAuthorizationFilter implements HandlerInterceptor {
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
         if(!ContainToken(request)){
-            setErrorResponse(response, SC_UNAUTHORIZED, "인증 오류");
+            setErrorResponse(response, SC_UNAUTHORIZED,  "NotContationToken", "인증 오류");
             return false;
         }
 
@@ -44,19 +44,19 @@ public class JwtAuthorizationFilter implements HandlerInterceptor {
             return true;
         } catch (JsonParseException e){
             log.error("JsonParseException");
-            setErrorResponse(response, SC_BAD_REQUEST, "입력 오류");
+            setErrorResponse(response, SC_BAD_REQUEST, "JsonParseException","입력 오류");
             return false;
         } catch (SignatureException | MalformedJwtException | UnsupportedJwtException e){
             log.error("JwtException");
-            setErrorResponse(response, SC_UNAUTHORIZED, "인증 오류");
+            setErrorResponse(response, SC_UNAUTHORIZED,  "JwtException", "인증 오류");
             return false;
         } catch (ExpiredJwtException e){
             log.error("JwtTokenExpired");
-            setErrorResponse(response, SC_FORBIDDEN, "토큰이 만료 되었습니다.");
+            setErrorResponse(response, SC_FORBIDDEN,  "JwtTokenExpired","토큰이 만료 되었습니다.");
             return false;
         } catch (AuthorizationServiceException e){
             log.error("AuthorizationException");
-            setErrorResponse(response, SC_UNAUTHORIZED, "권한이 없습니다.");
+            setErrorResponse(response, SC_UNAUTHORIZED,  "AuthorizationException","권한이 없습니다.");
             return false;
         }
     }
@@ -66,12 +66,13 @@ public class JwtAuthorizationFilter implements HandlerInterceptor {
      /**
      * 예외 발생시 response에 Status, 오류 메시지 설정 함수
      */
-    private void setErrorResponse(HttpServletResponse response, int Status, String message) throws IOException {
+    private void setErrorResponse(HttpServletResponse response, int Status, String code, String message) throws IOException {
         response.setCharacterEncoding("UTF-8");
         response.setContentType("application/json");
         response.setStatus(Status);
 
         Map<String, String> ErrorMessage = new HashMap<>();
+        ErrorMessage.put("code", code);
         ErrorMessage.put("message", message);
         String json = objectMapper.writeValueAsString(ErrorMessage);
         response.getWriter().write(json);

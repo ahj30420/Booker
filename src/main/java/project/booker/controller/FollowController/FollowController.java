@@ -10,6 +10,7 @@ import project.booker.controller.FollowController.dto.IsFollowing;
 import project.booker.controller.FollowController.dto.TargetProfile;
 import project.booker.domain.Follow;
 import project.booker.dto.AuthenticatedUser;
+import project.booker.dto.ImgFileDto;
 import project.booker.service.FollowService.FollowService;
 import project.booker.util.ImgStore;
 
@@ -68,20 +69,18 @@ public class FollowController {
         List<FollowProfile> result = new ArrayList<>();
 
         for (Follow follow : followList) {
+            String userProfileId = follow.getFollower().getProfileId();
             String nickname = follow.getFollower().getNickname();
             String intro = follow.getFollower().getIntro();
             String storeImgName = follow.getFollower().getImg().getStoreImgName();
 
-            File imgFile = new File(imgStore.getFullPath(storeImgName));
-            byte[] imgBytes = Files.readAllBytes(imgFile.toPath());
-            String base64Image = Base64.getEncoder().encodeToString(imgBytes);
-            String mimeType = imgStore.getMimeType(storeImgName);
+            ImgFileDto imgFile = imgStore.getImgFile(storeImgName);
 
             FollowProfile followProfile = FollowProfile.builder()
+                    .profileId(userProfileId)
                     .nickname(nickname)
                     .intro(intro)
-                    .base64Image(base64Image)
-                    .mimeType(mimeType)
+                    .imgFile(imgFile)
                     .build();
 
             result.add(followProfile);
@@ -110,20 +109,17 @@ public class FollowController {
         List<FollowProfile> result = new ArrayList<>();
 
         for (Follow follow : followList) {
+            String userProfileId = follow.getFollowing().getProfileId();
             String nickname = follow.getFollowing().getNickname();
             String intro = follow.getFollowing().getIntro();
             String storeImgName = follow.getFollowing().getImg().getStoreImgName();
 
-            File imgFile = new File(imgStore.getFullPath(storeImgName));
-            byte[] imgBytes = Files.readAllBytes(imgFile.toPath());
-            String base64Image = Base64.getEncoder().encodeToString(imgBytes);
-            String mimeType = imgStore.getMimeType(storeImgName);
-
+            ImgFileDto imgFile = imgStore.getImgFile(storeImgName);
             FollowProfile followProfile = FollowProfile.builder()
+                    .profileId(userProfileId)
                     .nickname(nickname)
                     .intro(intro)
-                    .base64Image(base64Image)
-                    .mimeType(mimeType)
+                    .imgFile(imgFile)
                     .build();
 
             result.add(followProfile);

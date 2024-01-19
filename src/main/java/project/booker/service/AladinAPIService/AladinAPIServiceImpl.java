@@ -16,6 +16,7 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 import project.booker.controller.BookController.dto.BestSeller;
+import project.booker.controller.BookController.dto.BestSellerList;
 import project.booker.controller.BookController.dto.BookInfo;
 
 import java.time.LocalDate;
@@ -41,7 +42,7 @@ public class AladinAPIServiceImpl implements AladinAPIService{
      * 6. Version: 검색 API 버전 (최신버전 20131101)
      */
     @Override
-    public ArrayList<BestSeller> getBestSeller() {
+    public BestSellerList getBestSeller(String start) {
 
         RestTemplate restTemplate = new RestTemplate();
         ObjectMapper objectMapper = new ObjectMapper();
@@ -53,7 +54,7 @@ public class AladinAPIServiceImpl implements AladinAPIService{
         params.add("ttbkey", TTBKey);
         params.add("QueryType", "Bestseller");
         params.add("MaxResults", "5");
-        params.add("start", "1");
+        params.add("start", start);
         params.add("SearchTarget", "Book");
         params.add("output", "JS");
         params.add("Version", "20131101");
@@ -79,8 +80,10 @@ public class AladinAPIServiceImpl implements AladinAPIService{
                 String cover = item.get("cover").asText();
                 String author = item.get("author").asText();
                 String publisher = item.get("publisher").asText();
+                String description = item.get("description").asText();
+                String category = item.get("categoryName").asText();
 
-                BestSeller bestSeller = new BestSeller(isbn13, title, cover, author, publisher);
+                BestSeller bestSeller = new BestSeller(isbn13, title, cover, author, publisher, category, description);
                 bestSellers.add(bestSeller);
             }
         } catch (JsonMappingException e) {
@@ -89,8 +92,8 @@ public class AladinAPIServiceImpl implements AladinAPIService{
             throw new RuntimeException(e);
         }
 
-
-        return bestSellers;
+        BestSellerList bestSellerList = new BestSellerList(start, bestSellers);
+        return bestSellerList;
     }
 
     /**

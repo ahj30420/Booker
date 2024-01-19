@@ -5,11 +5,9 @@ import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import project.booker.domain.embedded.Interest;
 import project.booker.domain.embedded.UploadImg;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 @Entity
@@ -33,21 +31,20 @@ public class MemberProfile {
     @Embedded
     private UploadImg img;
 
-    @Embedded
-    private Interest interest;
+    @OneToMany(mappedBy = "memberProfile")
+    private List<Interest> interests = new ArrayList<>();
 
     @OneToMany(mappedBy = "memberProfile")
     private List<Book> books = new ArrayList<>();
 
     //----------------------------------------생성 메서드-------------------------------------------------------
-    public static MemberProfile createMemberProfile(Member member, String nickname, String intro, UploadImg img, Interest interest){
+    public static MemberProfile createMemberProfile(Member member, String nickname, String intro, UploadImg img){
         MemberProfile memberProfile = new MemberProfile();
         memberProfile.profileId = NanoIdUtils.randomNanoId();
         memberProfile.addMember(member);
         memberProfile.nickname = nickname;
         memberProfile.intro = intro;
         memberProfile.img = img;
-        memberProfile.interest = interest;
 
         return memberProfile;
     }

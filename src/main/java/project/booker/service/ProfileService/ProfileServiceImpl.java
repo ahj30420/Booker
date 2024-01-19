@@ -1,26 +1,25 @@
 package project.booker.service.ProfileService;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import project.booker.controller.ProfileController.dto.SaveProfileDto;
-import project.booker.controller.ProfileController.dto.ViewProfileDto;
+import project.booker.domain.Interest;
 import project.booker.domain.Member;
 import project.booker.domain.MemberProfile;
-import project.booker.domain.embedded.Interest;
 import project.booker.domain.embedded.UploadImg;
 import project.booker.domain.Enum.Social;
 import project.booker.exception.errorcode.ErrorCode;
 import project.booker.exception.exceptions.DuplicatedNickNameException;
 import project.booker.exception.exceptions.InvalidProfileIdException;
+import project.booker.repository.InterestRepository.InterestRepository;
 import project.booker.repository.LoginRepository;
-import project.booker.repository.ProfileRepository;
-import project.booker.util.ImgStore;
+import project.booker.repository.PofileRepository.ProfileRepository;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -28,6 +27,7 @@ public class ProfileServiceImpl implements ProfileService{
 
     private final ProfileRepository profileRepository;
     private final LoginRepository loginRepository;
+    private final InterestRepository interestRepository;
 
     /**
      * Member 프로필 등록
@@ -48,12 +48,13 @@ public class ProfileServiceImpl implements ProfileService{
 
         String intro = saveProfileDto.getIntro();
 
-        Interest interest = new Interest(saveProfileDto.getInterest1(), saveProfileDto.getInterest2(), saveProfileDto.getInterest3(), saveProfileDto.getInterest4(), saveProfileDto.getInterest5());
-
         Member member = loginRepository.findByMemberId(memberId);
-        MemberProfile memberProfile = MemberProfile.createMemberProfile(member, nickname, intro, uploadImg, interest);
+        MemberProfile memberProfile = MemberProfile.createMemberProfile(member, nickname, intro, uploadImg);
 
         profileRepository.save(memberProfile);
+
+        List<String> interestList = saveProfileDto.getInterestList();
+        interestRepository.bulkSave(memberProfile.getProfilePk(), interestList);
 
         if(member.getSocial() == Social.NORMAL){
             result.put("social", member.getSocial());
@@ -76,12 +77,29 @@ public class ProfileServiceImpl implements ProfileService{
      */
     @Override
     public MemberProfile viewProfile(String profileId) {
-        MemberProfile memberProfile = profileRepository.findByProfileId(profileId);
+        MemberProfile memberProfile = profileRepository.findFetchInterestByProfileId(profileId);
         if(memberProfile == null){
             throw new InvalidProfileIdException(ErrorCode.INVALID_PROFILEID);
         }
 
         return memberProfile;
+    }
+
+    /**
+     * 관심사가 비슷한 유저 추천
+     * 관심사가 적어도 절반 이상 같은 사용자 조회
+     */
+    @Override
+    public Slice<MemberProfile> recommendUser(String profileId, Pageable pageable) {
+
+        MemberProfile memberProfile = profileRepository.findFetchInterestByProfileId(profileId);
+
+        List<String> interests = memberProfile.getInterests()
+                .stream()
+                .map(Interest::getInterest)
+                .collect(Collectors.toList());
+
+        return profileRepository.searchSimilarUser(memberProfile.getProfilePk(), interests, pageable);
     }
     //--------------------------------------Private Method-----------------------------------------------------
 

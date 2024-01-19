@@ -3,14 +3,22 @@ package project.booker.controller.BookController;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.MessageSource;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.FieldError;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import project.booker.controller.BookController.dto.*;
 import project.booker.domain.Book;
 import project.booker.dto.AuthenticatedUser;
 import project.booker.controller.BookController.dto.NewBook;
+import project.booker.exception.exceptions.ValidationException;
+import project.booker.repository.BookRepository.BookRepository;
+import project.booker.repository.ReportRepository;
 import project.booker.service.AladinAPIService.AladinAPIService;
 import project.booker.service.BookService.BookService;
 
@@ -29,8 +37,8 @@ public class BookController {
      * 알라딘 베스트 셀러 조회
      */
     @GetMapping("/bestseller")
-    public ArrayList<BestSeller> bestSeller(){
-        return aladinAPIService.getBestSeller();
+    public BestSellerList bestSeller(@RequestParam(name = "start", defaultValue = "1") String start){
+        return aladinAPIService.getBestSeller(start);
     }
 
     /**
@@ -97,7 +105,6 @@ public class BookController {
         return bookDetail;
     }
 
-
     /**
      * 개인 서재 책 목록 조회
      *
@@ -151,7 +158,7 @@ public class BookController {
 
         AuthenticatedUser authenticatedUser = (AuthenticatedUser) request.getAttribute("AuthenticatedUser");
         String profileId = authenticatedUser.getProfileId();
-        String userName = authenticatedUser.getName();
+        String userNickname = authenticatedUser.getNickname();
 
         List<Book> books = bookService.searchReadingBooks(profileId);
         List<Reading> readings = new ArrayList<>();
@@ -170,8 +177,35 @@ public class BookController {
             readings.add(reading);
         }
 
-        ReadingList readingList = new ReadingList(userName, readings);
+        ReadingList readingList = new ReadingList(userNickname, readings);
         return readingList;
+    }
+
+    /**
+     * 독서 현황 변경
+     */
+    @PatchMapping("/progress")
+    public String changeProgress(@RequestBody ChangeProgress changeProgress){
+        bookService.changeProgress(changeProgress);
+        return "success";
+    }
+
+    /**
+     * 거래 가능 여부 변경
+     */
+    @PatchMapping("/saleState")
+    public String changeSaleSate(@RequestBody ChangeSaleState changeSaleState){
+        bookService.changeSaleSate(changeSaleState);
+        return "success";
+    }
+
+    /**
+     * 책 삭제
+     */
+    @DeleteMapping
+    public String deleteBook(@RequestParam("bookId") String bookId){
+        bookService.deleteBook(bookId);
+        return "success";
     }
 
 }

@@ -14,5 +14,7 @@ public class BestSeller {
     private String cover;
     private String author;
     private String publisher;
+    private String category;
+    private String description;
 
 }

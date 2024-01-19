@@ -6,18 +6,16 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import project.booker.controller.BookController.dto.BookDetail;
-import project.booker.controller.BookController.dto.SimpleReport;
+import project.booker.controller.BookController.dto.*;
 import project.booker.domain.Book;
 import project.booker.domain.Enum.Sharing;
 import project.booker.domain.MemberProfile;
 import project.booker.domain.Enum.Progress;
 import project.booker.domain.Enum.SaleState;
-import project.booker.controller.BookController.dto.NewBook;
 import project.booker.exception.errorcode.ErrorCode;
 import project.booker.exception.exceptions.NotExistBookException;
 import project.booker.repository.BookRepository.BookRepository;
-import project.booker.repository.ProfileRepository;
+import project.booker.repository.PofileRepository.ProfileRepository;
 
 import java.util.List;
 
@@ -110,5 +108,37 @@ public class BookServiceImpl implements BookService{
     @Override
     public List<Book> searchReadingBooks(String profileId) {
         return bookRepository.getReadingBooks(profileId);
+    }
+
+    /**
+     * 독서 현황 변경
+     */
+    @Override
+    public void changeProgress(ChangeProgress changeProgress) {
+        String bookId = changeProgress.getBookId();
+        Progress progress = changeProgress.getProgress();
+
+        Book book = bookRepository.findByBookId(bookId);
+        book.changeProgress(progress);
+    }
+
+    /**
+     * 거래 가능 여부 변경
+     */
+    @Override
+    public void changeSaleSate(ChangeSaleState changeSaleState) {
+        String bookId = changeSaleState.getBookId();
+        SaleState saleState = changeSaleState.getSaleState();
+
+        Book book = bookRepository.findByBookId(bookId);
+        book.changeSaleState(saleState);
+    }
+
+    /**
+     * 책 삭제 하기
+     */
+    @Override
+    public void deleteBook(String bookId) {
+        bookRepository.deleteByBookId(bookId);
     }
 }

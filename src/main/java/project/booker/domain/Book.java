@@ -58,4 +58,13 @@ public class Book {
         memberProfile.getBooks().add(this);
     }
 
+    //----------------------------------------수정 메서드-------------------------------------------------------
+    public void changeProgress(Progress progress){
+        this.progress = progress;
+    }
+
+    public void changeSaleState(SaleState saleState){
+        this.saleState = saleState;
+    }
+
 }

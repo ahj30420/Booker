@@ -14,4 +14,5 @@ public interface ReportService {
     void deleteReport(String reportId);
 
     void updateReport(UpdateReportDto updateReportDto, UploadImg uploadImg);
+
 }

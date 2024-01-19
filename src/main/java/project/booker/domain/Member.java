@@ -52,6 +52,7 @@ public class Member {
         return member;
     }
 
+    //----------------------------------------수정 메서드-------------------------------------------------------
     public void updateRefreshToken(String refreshToken){
         this.refreshToken = refreshToken;
     }

@@ -16,4 +16,5 @@ public interface BookRepository extends JpaRepository<Book, Long>, BookRepositor
     @EntityGraph(attributePaths = {"memberProfile"})
     Book findFetchByBookId(String bookId);
 
+    void deleteByBookId(String bookId);
 }

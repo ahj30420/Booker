@@ -6,9 +6,12 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 import project.booker.domain.embedded.UploadImg;
 import project.booker.dto.Enum.DefaultImg;
+import project.booker.dto.ImgFileDto;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.util.Base64;
 import java.util.UUID;
 
 @Slf4j
@@ -41,18 +44,18 @@ public class ImgStore {
     }
 
     /**
-     * 파일을 저장할 경로 설정
+     * 이미지 파일 전송을 위해 base64인코딩 + MiMe 타입 반환
      */
-    public String getFullPath(String storeFileName) {
-        return ImgDir + storeFileName;
-    }
+    public ImgFileDto getImgFile(String storeImgName) throws IOException {
+        File imgFile = new File(getFullPath(storeImgName));
+        byte[] imgBytes = Files.readAllBytes(imgFile.toPath());
+        String base64Image = Base64.getEncoder().encodeToString(imgBytes);
+        String mimeType = getMimeType(storeImgName);
 
-    /**
-     * MiMe타입 반환하기
-     */
-    public String getMimeType(String storeFileName){
-        String ext = extractExt(storeFileName);
-        return "image/"+ext;
+        return ImgFileDto.builder()
+                .base64Image(base64Image)
+                .mimeType(mimeType)
+                .build();
     }
 
     //--------------------------------------Private Method-----------------------------------------------------
@@ -73,6 +76,21 @@ public class ImgStore {
     private String extractExt(String originalFilename) {
         int pos = originalFilename.lastIndexOf(".");
         return originalFilename.substring(pos+1);
+    }
+
+    /**
+     * MiMe타입 반환하기
+     */
+    private String getMimeType(String storeFileName){
+        String ext = extractExt(storeFileName);
+        return "image/"+ext;
+    }
+
+    /**
+     * 파일을 저장할 경로 설정
+     */
+    private String getFullPath(String storeFileName) {
+        return ImgDir + storeFileName;
     }
 
 }

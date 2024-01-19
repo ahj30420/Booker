@@ -11,7 +11,7 @@ import project.booker.domain.MemberProfile;
 import project.booker.exception.errorcode.ErrorCode;
 import project.booker.exception.exceptions.InvalidProfileIdException;
 import project.booker.repository.FollowRepository;
-import project.booker.repository.ProfileRepository;
+import project.booker.repository.PofileRepository.ProfileRepository;
 
 import java.util.List;
 
@@ -38,8 +38,8 @@ public class FollowServiceImpl implements  FollowService{
             throw new InvalidProfileIdException(ErrorCode.INVALID_PROFILEID);
         }
 
-        Long countFollower = followRepository.countByFollower(memberProfile);
-        Long countFollowing = followRepository.countByFollowing(memberProfile);
+        Long countFollower = followRepository.countByFollowing(memberProfile);
+        Long countFollowing = followRepository.countByFollower(memberProfile);
 
         FollowCount followCount = new FollowCount(countFollower, countFollowing);
 

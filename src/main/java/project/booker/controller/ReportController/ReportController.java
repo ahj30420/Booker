@@ -1,5 +1,6 @@
 package project.booker.controller.ReportController;
 
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.MessageSource;
@@ -13,7 +14,9 @@ import project.booker.controller.ReportController.dto.UpdateReportDto;
 import project.booker.domain.Enum.Sharing;
 import project.booker.domain.Report;
 import project.booker.domain.embedded.UploadImg;
+import project.booker.dto.AuthenticatedUser;
 import project.booker.dto.Enum.DefaultImg;
+import project.booker.dto.ImgFileDto;
 import project.booker.exception.exceptions.ValidationException;
 import project.booker.service.ReportService.ReportService;
 import project.booker.util.ImgStore;
@@ -71,18 +74,15 @@ public class ReportController {
         LocalDateTime redate = report.getRedate();
 
         String storeImgName = report.getImg().getStoreImgName();
-        File imgFile = new File(imgStore.getFullPath(storeImgName));
-        byte[] imgBytes = Files.readAllBytes(imgFile.toPath());
-        String base64Image = Base64.getEncoder().encodeToString(imgBytes);
-        String mimeType = imgStore.getMimeType(storeImgName);
+        ImgFileDto imgFile = imgStore.getImgFile(storeImgName);
 
         Map<String, Object> map = new HashMap<>();
         map.put("title", title);
         map.put("content", content);
         map.put("sharing", sharing);
         map.put("redate", redate);
-        map.put("imgBytes", imgBytes);
-        map.put("mimeType", mimeType);
+        map.put("imgBytes", imgFile.getBase64Image());
+        map.put("mimeType", imgFile.getMimeType());
 
         return map;
 

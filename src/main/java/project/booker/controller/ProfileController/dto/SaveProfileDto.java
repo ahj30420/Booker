@@ -5,6 +5,9 @@ import jakarta.validation.constraints.Size;
 import lombok.Data;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Data
 public class SaveProfileDto {
 
@@ -24,10 +27,6 @@ public class SaveProfileDto {
     private String intro;
 
     private MultipartFile imageFile;
-    private String interest1;
-    private String interest2;
-    private String interest3;
-    private String interest4;
-    private String interest5;
+    private List<String> interestList = new ArrayList<>();
 
 }

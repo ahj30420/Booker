@@ -4,18 +4,25 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.MessageSource;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import project.booker.controller.ProfileController.dto.RecommendList;
+import project.booker.controller.ProfileController.dto.RecommendProfileDto;
 import project.booker.controller.ProfileController.dto.SaveProfileDto;
 import project.booker.controller.ProfileController.dto.ViewProfileDto;
 import project.booker.domain.Enum.Social;
+import project.booker.domain.Interest;
 import project.booker.domain.MemberProfile;
 import project.booker.domain.embedded.UploadImg;
 import project.booker.dto.AuthenticatedUser;
 import project.booker.dto.Enum.DefaultImg;
+import project.booker.dto.ImgFileDto;
 import project.booker.exception.exceptions.ValidationException;
 import project.booker.service.LoginService.LoginService;
 import project.booker.service.ProfileService.ProfileService;
@@ -27,6 +34,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Slf4j
 @RestController
@@ -101,29 +109,60 @@ public class ProfileContoller {
         String nickname = memberProfile.getNickname();
         String intro = memberProfile.getIntro();
         String storeImgName = memberProfile.getImg().getStoreImgName();
-        String interest1 = memberProfile.getInterest().getInterest1();
-        String interest2 = memberProfile.getInterest().getInterest2();
-        String interest3 = memberProfile.getInterest().getInterest3();
-        String interest4 = memberProfile.getInterest().getInterest4();
-        String interest5 = memberProfile.getInterest().getInterest5();
 
-        File imgFile = new File(imgStore.getFullPath(storeImgName));
-        byte[] imgBytes = Files.readAllBytes(imgFile.toPath());
-        String base64Image = Base64.getEncoder().encodeToString(imgBytes);
-        String mimeType = imgStore.getMimeType(storeImgName);
+        ImgFileDto imgFile = imgStore.getImgFile(storeImgName);
 
-        List<String> interets = new ArrayList<>(Arrays.asList(interest1, interest2, interest3, interest4, interest5))
+        List<String> interests = memberProfile.getInterests()
                 .stream()
-                .filter(val -> val != null)
-                .toList();
+                .map(Interest::getInterest)
+                .collect(Collectors.toList());
 
-        ViewProfileDto viewProfileDto = new ViewProfileDto(nickname, intro, base64Image, mimeType, interets);
+        ViewProfileDto viewProfileDto = new ViewProfileDto(nickname, intro, imgFile, interests);
 
         return viewProfileDto;
     }
 
+    /**
+     * 관심사가 비슷한 유저 추천
+     */
+    @GetMapping("/profile/Recommendation")
+    public RecommendList recommendUser(HttpServletRequest request,
+                              @PageableDefault(page = 0, size = 5) Pageable pageable) throws IOException {
 
+        AuthenticatedUser authenticatedUser = (AuthenticatedUser) request.getAttribute("AuthenticatedUser");
+        String profileId = authenticatedUser.getProfileId();
 
+        Slice<MemberProfile> sliceInfo = profileService.recommendUser(profileId, pageable);
+        List<MemberProfile> memberProfiles = sliceInfo.getContent();
+        int nowPage = sliceInfo.getNumber();
+        boolean hasNext = sliceInfo.hasNext();
+
+        List<RecommendProfileDto> recommends = new ArrayList<>();
+        for (MemberProfile memberProfile : memberProfiles) {
+            String id = memberProfile.getProfileId();
+            String nickname = memberProfile.getNickname();
+            String storeImgName = memberProfile.getImg().getStoreImgName();
+
+            ImgFileDto imgFile = imgStore.getImgFile(storeImgName);
+
+            List<String> interests = memberProfile.getInterests()
+                    .stream()
+                    .map(Interest::getInterest)
+                    .collect(Collectors.toList());
+
+            RecommendProfileDto recommendProfileDto = RecommendProfileDto.builder()
+                    .profileId(id)
+                    .nickname(nickname)
+                    .imgFileDto(imgFile)
+                    .interests(interests)
+                    .build();
+
+            recommends.add(recommendProfileDto);
+        }
+
+        RecommendList recommendList = new RecommendList(nowPage, hasNext, recommends);
+        return recommendList;
+    }
 
     //--------------------------------------Private Method-----------------------------------------------------
 

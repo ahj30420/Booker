@@ -3,6 +3,8 @@ package project.booker.service.BookService;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import project.booker.controller.BookController.dto.BookDetail;
+import project.booker.controller.BookController.dto.ChangeProgress;
+import project.booker.controller.BookController.dto.ChangeSaleState;
 import project.booker.domain.Book;
 import project.booker.controller.BookController.dto.NewBook;
 
@@ -20,4 +22,9 @@ public interface BookService {
 
     List<Book> searchReadingBooks(String profileId);
 
+    void changeProgress(ChangeProgress changeProgress);
+
+    void changeSaleSate(ChangeSaleState changeSaleState);
+
+    void deleteBook(String bookId);
 }
