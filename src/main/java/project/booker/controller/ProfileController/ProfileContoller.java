@@ -12,10 +12,7 @@ import org.springframework.validation.FieldError;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import project.booker.controller.ProfileController.dto.RecommendList;
-import project.booker.controller.ProfileController.dto.RecommendProfileDto;
-import project.booker.controller.ProfileController.dto.SaveProfileDto;
-import project.booker.controller.ProfileController.dto.ViewProfileDto;
+import project.booker.controller.ProfileController.dto.*;
 import project.booker.domain.Enum.Social;
 import project.booker.domain.Interest;
 import project.booker.domain.MemberProfile;
@@ -39,7 +36,7 @@ import java.util.stream.Collectors;
 @Slf4j
 @RestController
 @RequiredArgsConstructor
-public class ProfileContoller {
+public class  ProfileContoller {
 
     private final ProfileService profileService;
     private final LoginService loginService;
@@ -65,7 +62,6 @@ public class ProfileContoller {
             sendValidationError(bindingResult);
         }
 
-        log.info("memberId={}", memberId);
         MultipartFile ImgFile = saveProfileDto.getImageFile();
         UploadImg uploadImg = imgStore.storeImge(ImgFile, DefaultImg.PROFILE);
 
@@ -93,7 +89,6 @@ public class ProfileContoller {
      * @Param profileId: 사용자의 프로필인지 타인의 프로필인지 구분하기 위해 사용
      *
      * 1. profileId로 누구의 프로필 조회인지 구분
-     * 2. response Dto에 프로필 정보 매핑
      */
     @GetMapping("/profileInfo")
     public ViewProfileDto viewProfile(HttpServletRequest request,
@@ -104,22 +99,7 @@ public class ProfileContoller {
             profileId = user.getProfileId();
         }
 
-        MemberProfile memberProfile = profileService.viewProfile(profileId);
-
-        String nickname = memberProfile.getNickname();
-        String intro = memberProfile.getIntro();
-        String storeImgName = memberProfile.getImg().getStoreImgName();
-
-        ImgFileDto imgFile = imgStore.getImgFile(storeImgName);
-
-        List<String> interests = memberProfile.getInterests()
-                .stream()
-                .map(Interest::getInterest)
-                .collect(Collectors.toList());
-
-        ViewProfileDto viewProfileDto = new ViewProfileDto(nickname, intro, imgFile, interests);
-
-        return viewProfileDto;
+        return profileService.viewProfile(profileId);
     }
 
     /**
@@ -132,36 +112,23 @@ public class ProfileContoller {
         AuthenticatedUser authenticatedUser = (AuthenticatedUser) request.getAttribute("AuthenticatedUser");
         String profileId = authenticatedUser.getProfileId();
 
-        Slice<MemberProfile> sliceInfo = profileService.recommendUser(profileId, pageable);
-        List<MemberProfile> memberProfiles = sliceInfo.getContent();
-        int nowPage = sliceInfo.getNumber();
-        boolean hasNext = sliceInfo.hasNext();
+        return profileService.recommendUser(profileId, pageable);
+    }
 
-        List<RecommendProfileDto> recommends = new ArrayList<>();
-        for (MemberProfile memberProfile : memberProfiles) {
-            String id = memberProfile.getProfileId();
-            String nickname = memberProfile.getNickname();
-            String storeImgName = memberProfile.getImg().getStoreImgName();
+    /**
+     * 유저 검색
+     */
+    @GetMapping("/profile/search")
+    public SearchProfileList searchProfile(@RequestParam("nickname") String nickname) throws IOException {
+        return profileService.searchProfile(nickname);
+    }
 
-            ImgFileDto imgFile = imgStore.getImgFile(storeImgName);
-
-            List<String> interests = memberProfile.getInterests()
-                    .stream()
-                    .map(Interest::getInterest)
-                    .collect(Collectors.toList());
-
-            RecommendProfileDto recommendProfileDto = RecommendProfileDto.builder()
-                    .profileId(id)
-                    .nickname(nickname)
-                    .imgFileDto(imgFile)
-                    .interests(interests)
-                    .build();
-
-            recommends.add(recommendProfileDto);
-        }
-
-        RecommendList recommendList = new RecommendList(nowPage, hasNext, recommends);
-        return recommendList;
+    /**
+     * 프로필 이미지, 닉네임 조회(쪽지 작성 페이지)
+     */
+    @GetMapping("/profile/img/nickname")
+    public MessageProfile searchSimpleProfile(@RequestParam("profileId") String profileId) throws IOException {
+        return profileService.searchSimpleProfile(profileId);
     }
 
     //--------------------------------------Private Method-----------------------------------------------------

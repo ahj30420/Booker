@@ -27,7 +27,6 @@ import java.util.List;
 public class FollowController {
 
     private final FollowService followService;
-    private final ImgStore imgStore;
 
     /**
      * 팔로우 수 조회
@@ -55,7 +54,6 @@ public class FollowController {
      *  @param profileId: 사용자의 팔로워 조회인지 다른 사람의 팔로워 조회인지 구분하기 위해 사용
      *  1. 어떤 사용자의 팔로워를 조회 할 것인지 결정
      *  2. 해당 사용자를 팔로우 하고 있는 팔로우 정보 조회
-     *  3. 팔로워의 닉네임, 소개글, 이미지 전송을 위해 DTO로 변환
      */
     @GetMapping("/follower/list")
     public List<FollowProfile> getFollowerList(HttpServletRequest request, @RequestParam(name = "profileId", required = false) String profileId) throws IOException {
@@ -65,28 +63,7 @@ public class FollowController {
             profileId = user.getProfileId();
         }
 
-        List<Follow> followList = followService.searchFollowers(profileId);
-        List<FollowProfile> result = new ArrayList<>();
-
-        for (Follow follow : followList) {
-            String userProfileId = follow.getFollower().getProfileId();
-            String nickname = follow.getFollower().getNickname();
-            String intro = follow.getFollower().getIntro();
-            String storeImgName = follow.getFollower().getImg().getStoreImgName();
-
-            ImgFileDto imgFile = imgStore.getImgFile(storeImgName);
-
-            FollowProfile followProfile = FollowProfile.builder()
-                    .profileId(userProfileId)
-                    .nickname(nickname)
-                    .intro(intro)
-                    .imgFile(imgFile)
-                    .build();
-
-            result.add(followProfile);
-        }
-
-        return result;
+        return followService.searchFollowers(profileId);
     }
 
     /**
@@ -105,27 +82,7 @@ public class FollowController {
             profileId = user.getProfileId();
         }
 
-        List<Follow> followList = followService.searchFollowing(profileId);
-        List<FollowProfile> result = new ArrayList<>();
-
-        for (Follow follow : followList) {
-            String userProfileId = follow.getFollowing().getProfileId();
-            String nickname = follow.getFollowing().getNickname();
-            String intro = follow.getFollowing().getIntro();
-            String storeImgName = follow.getFollowing().getImg().getStoreImgName();
-
-            ImgFileDto imgFile = imgStore.getImgFile(storeImgName);
-            FollowProfile followProfile = FollowProfile.builder()
-                    .profileId(userProfileId)
-                    .nickname(nickname)
-                    .intro(intro)
-                    .imgFile(imgFile)
-                    .build();
-
-            result.add(followProfile);
-        }
-
-        return result;
+        return followService.searchFollowing(profileId);
     }
 
 

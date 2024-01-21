@@ -12,11 +12,16 @@ import project.booker.domain.Enum.Sharing;
 import project.booker.domain.MemberProfile;
 import project.booker.domain.Enum.Progress;
 import project.booker.domain.Enum.SaleState;
+import project.booker.domain.embedded.UploadImg;
+import project.booker.dto.ImgFileDto;
 import project.booker.exception.errorcode.ErrorCode;
 import project.booker.exception.exceptions.NotExistBookException;
 import project.booker.repository.BookRepository.BookRepository;
 import project.booker.repository.PofileRepository.ProfileRepository;
+import project.booker.util.ImgStore;
 
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
@@ -27,6 +32,7 @@ public class BookServiceImpl implements BookService{
 
     private final BookRepository bookRepository;
     private final ProfileRepository profileRepository;
+    private final ImgStore imgStore;
 
     /**
      * 개인 서재에 책 추가하기
@@ -95,10 +101,30 @@ public class BookServiceImpl implements BookService{
     /**
      * 개인 서재 목록 조회
      * 1. 해당 사용자의 개인 서재 책 목록 조회
+     * 2. Dto로 변환 및 반환
      */
     @Override
-    public Slice<Book> getBookList(String profileId, Pageable pageable) {
-        return bookRepository.getBookListByProfileId(profileId, pageable);
+    public LibraryList getBookList(String profileId, Pageable pageable) {
+        Slice<Book> sliceInfo = bookRepository.getBookListByProfileId(profileId, pageable);
+        List<Book> books = sliceInfo.getContent();
+        int nowPage = sliceInfo.getNumber();
+        boolean hasNext = sliceInfo.hasNext();
+
+        List<BookList> bookLists = new ArrayList<>();
+        for(int i = 0; i < books.size(); i++){
+            BookList bookList = BookList.builder()
+                    .bookId(books.get(i).getBookId())
+                    .isbn13(books.get(i).getIsbn13())
+                    .progress(books.get(i).getProgress())
+                    .saleState(books.get(i).getSaleState())
+                    .img(books.get(i).getImg())
+                    .build();
+
+            bookLists.add(bookList);
+        }
+
+        LibraryList libraryList = new LibraryList(nowPage, hasNext, bookLists);
+        return libraryList;
     }
 
     /**
@@ -140,5 +166,33 @@ public class BookServiceImpl implements BookService{
     @Override
     public void deleteBook(String bookId) {
         bookRepository.deleteByBookId(bookId);
+    }
+
+    /**
+     * 책 거래 기능
+     * 설명: 요청받은 책을 거래 가능한 유저 검색(SaleSate == POS)
+     */
+    @Override
+    public SalePosMemberList searchSaleState(String isbn13) throws IOException {
+        List<Book> books = bookRepository.findAllFetchByIsbn13AndSaleState(isbn13, SaleState.POS);
+
+        SalePosMemberList salePosMemberList = new SalePosMemberList();
+        for (Book book : books) {
+            String profileId = book.getMemberProfile().getProfileId();
+            String nickname = book.getMemberProfile().getNickname();
+            String storeImgName = book.getMemberProfile().getImg().getStoreImgName();
+
+            ImgFileDto imgFileDto = imgStore.getImgFile(storeImgName);
+
+            SalePosMember member = SalePosMember.builder()
+                    .profileId(profileId)
+                    .imgFileDto(imgFileDto)
+                    .nickname(nickname)
+                    .build();
+
+            salePosMemberList.getSalePosMembers().add(member);
+        }
+
+        return salePosMemberList;
     }
 }

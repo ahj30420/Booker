@@ -13,5 +13,4 @@ public interface ProfileRepository extends JpaRepository<MemberProfile, Long>, P
     public MemberProfile findFetchInterestByProfileId(String profileId);
 
     public MemberProfile findProfileByNickname(String Nickname);
-
 }

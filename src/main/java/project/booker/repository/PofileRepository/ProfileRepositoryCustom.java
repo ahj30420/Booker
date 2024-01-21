@@ -10,4 +10,8 @@ public interface ProfileRepositoryCustom {
 
     Slice<MemberProfile> searchSimilarUser(Long profilePk, List<String> interests, Pageable pageable);
 
+    List<MemberProfile> searchProfile(String nickname);
+
+    List<MemberProfile> searchSenderRecipient(String senderId, String recipientId);
+
 }

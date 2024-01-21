@@ -2,12 +2,10 @@ package project.booker.service.BookService;
 
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
-import project.booker.controller.BookController.dto.BookDetail;
-import project.booker.controller.BookController.dto.ChangeProgress;
-import project.booker.controller.BookController.dto.ChangeSaleState;
+import project.booker.controller.BookController.dto.*;
 import project.booker.domain.Book;
-import project.booker.controller.BookController.dto.NewBook;
 
+import java.io.IOException;
 import java.util.List;
 
 public interface BookService {
@@ -18,7 +16,7 @@ public interface BookService {
 
     NewBook isNewBook(String profileId, String isbn13);
 
-    Slice<Book> getBookList(String profileId, Pageable pageable);
+    LibraryList getBookList(String profileId, Pageable pageable);
 
     List<Book> searchReadingBooks(String profileId);
 
@@ -27,4 +25,6 @@ public interface BookService {
     void changeSaleSate(ChangeSaleState changeSaleState);
 
     void deleteBook(String bookId);
+
+    SalePosMemberList searchSaleState(String isbn13) throws IOException;
 }

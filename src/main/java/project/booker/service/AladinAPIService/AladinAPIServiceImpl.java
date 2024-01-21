@@ -15,9 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
-import project.booker.controller.BookController.dto.BestSeller;
-import project.booker.controller.BookController.dto.BestSellerList;
-import project.booker.controller.BookController.dto.BookInfo;
+import project.booker.controller.BookController.dto.*;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -154,5 +152,74 @@ public class AladinAPIServiceImpl implements AladinAPIService{
         }
 
         return bookInfo;
+    }
+
+    /**
+     * 제목 + 저자로 책 검색
+     * params
+     * 1. Query: 검색어
+     * 2. MaxResults: 검색결과 한 페이지당 최대 출력 개수
+     * 3. output: 출력방법 (XML, JSON)
+     * 4. Version: 검색 API 버전 (최신버전 20131101)
+     */
+    @Override
+    public SearchBookList searchBook(String titleOrAuthor, String size, String maxResult) {
+
+        RestTemplate restTemplate = new RestTemplate();
+        ObjectMapper objectMapper = new ObjectMapper();
+
+        HttpHeaders httpHeaders = new HttpHeaders();
+        httpHeaders.add("Content-Type", "application/x-www-form-urlencoded");
+
+        MultiValueMap<String,String> params = new LinkedMultiValueMap<>();
+        params.add("ttbkey", TTBKey);
+        params.add("Query", titleOrAuthor);
+        params.add("Size", size);
+        params.add("MaxResults", maxResult);
+        params.add("output", "JS");
+        params.add("Version", "20131101");
+
+        HttpEntity<MultiValueMap<String,String>> request = new HttpEntity<>(params, httpHeaders);
+
+        ResponseEntity<String> response = restTemplate.exchange(
+                "http://www.aladin.co.kr/ttb/api/ItemSearch.aspx\n",
+                HttpMethod.POST,
+                request,
+                String.class
+        );
+
+        SearchBook searchBook;
+        SearchBookList searchBookList = new SearchBookList();
+
+        try{
+            JsonNode jsonNode = objectMapper.readTree(response.getBody());
+
+            JsonNode items = jsonNode.get("item");
+
+            for(JsonNode item: items){
+                String isbn13 = item.get("isbn13").asText();
+                String title = item.get("title").asText();
+                String author = item.get("author").asText();
+                String publisher = item.get("publisher").asText();
+                String img = item.get("cover").asText();
+
+                searchBook = SearchBook.builder()
+                        .isbn13(isbn13)
+                        .title(title)
+                        .author(author)
+                        .publisher(publisher)
+                        .img(img)
+                        .build();
+
+                searchBookList.getSearchBooks().add(searchBook);
+            }
+        } catch (JsonMappingException e) {
+            throw new RuntimeException(e);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+
+        return searchBookList;
+
     }
 }

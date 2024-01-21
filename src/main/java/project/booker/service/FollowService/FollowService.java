@@ -1,18 +1,20 @@
 package project.booker.service.FollowService;
 
 import project.booker.controller.FollowController.dto.FollowCount;
+import project.booker.controller.FollowController.dto.FollowProfile;
 import project.booker.controller.FollowController.dto.IsFollowing;
 import project.booker.domain.Follow;
 import project.booker.domain.MemberProfile;
 
+import java.io.IOException;
 import java.util.List;
 
 public interface FollowService {
     FollowCount searchFollowCount(String profileId);
 
-    List<Follow> searchFollowers(String profileId);
+    List<FollowProfile> searchFollowers(String profileId) throws IOException;
 
-    List<Follow> searchFollowing(String profileId);
+    List<FollowProfile> searchFollowing(String profileId) throws IOException;
 
     void Subscribe(String userProfileId, String targetProfileId);
 

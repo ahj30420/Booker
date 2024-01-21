@@ -50,4 +50,28 @@ public class ProfileRepositoryImpl implements ProfileRepositoryCustom{
 
         return new SliceImpl<>(profiles, pageable, hasNext);
     }
+
+    /**
+     * 닉네임으로 유저 검색
+     */
+    @Override
+    public List<MemberProfile> searchProfile(String nickname) {
+        return queryFactory.selectFrom(memberProfile)
+                .where(memberProfile.nickname.like("%" + nickname + "%"))
+                .offset(0)
+                .limit(10)
+                .fetch();
+    }
+
+    /**
+     * 쪽지 발신자, 수신자 조회
+     */
+    @Override
+    public List<MemberProfile> searchSenderRecipient(String senderId, String recipientId) {
+        List<MemberProfile> members = queryFactory.selectFrom(memberProfile)
+                .where(memberProfile.profileId.in(senderId, recipientId))
+                .fetch();
+
+        return members;
+    }
 }

@@ -1,6 +1,5 @@
 package project.booker.controller.ReportController;
 
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.MessageSource;
@@ -14,18 +13,14 @@ import project.booker.controller.ReportController.dto.UpdateReportDto;
 import project.booker.domain.Enum.Sharing;
 import project.booker.domain.Report;
 import project.booker.domain.embedded.UploadImg;
-import project.booker.dto.AuthenticatedUser;
 import project.booker.dto.Enum.DefaultImg;
 import project.booker.dto.ImgFileDto;
 import project.booker.exception.exceptions.ValidationException;
 import project.booker.service.ReportService.ReportService;
 import project.booker.util.ImgStore;
 
-import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.time.LocalDateTime;
-import java.util.Base64;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;

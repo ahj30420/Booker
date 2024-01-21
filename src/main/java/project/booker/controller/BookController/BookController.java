@@ -3,25 +3,18 @@ package project.booker.controller.BookController;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.MessageSource;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.web.PageableDefault;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.validation.BindingResult;
-import org.springframework.validation.FieldError;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import project.booker.controller.BookController.dto.*;
 import project.booker.domain.Book;
 import project.booker.dto.AuthenticatedUser;
 import project.booker.controller.BookController.dto.NewBook;
-import project.booker.exception.exceptions.ValidationException;
-import project.booker.repository.BookRepository.BookRepository;
-import project.booker.repository.ReportRepository;
 import project.booker.service.AladinAPIService.AladinAPIService;
 import project.booker.service.BookService.BookService;
 
+import java.io.IOException;
 import java.util.*;
 
 @Slf4j
@@ -39,6 +32,16 @@ public class BookController {
     @GetMapping("/bestseller")
     public BestSellerList bestSeller(@RequestParam(name = "start", defaultValue = "1") String start){
         return aladinAPIService.getBestSeller(start);
+    }
+
+    /**
+     * 알라딘 책 검색
+     */
+    @GetMapping("/search")
+    public SearchBookList searchBook(@RequestParam("titleOrAuthor") String titleOrAuthor,
+                                     @RequestParam("start") String start,
+                                     @RequestParam("maxResult") String maxResult){
+        return aladinAPIService.searchBook(titleOrAuthor, start, maxResult);
     }
 
     /**
@@ -113,8 +116,6 @@ public class BookController {
      *
      * 1. 사용자의 개인 서재인지 타인의 개인 서재인지 구분
      * 2. 개인 서재의 책 목록 조회
-     * 3. 책의 ISBN13 값으로 책 정보 조회(알라딘 API)
-     * 4. BookID + 책 이미지 반환
      */
     @GetMapping("/library/list")
     public LibraryList searchBookList(HttpServletRequest request,
@@ -126,26 +127,7 @@ public class BookController {
             profileId = authenticatedUser.getProfileId();
         }
 
-        Slice<Book> sliceInfo = bookService.getBookList(profileId, pageable);
-        List<Book> books = sliceInfo.getContent();
-        int nowPage = sliceInfo.getNumber();
-        boolean hasNext = sliceInfo.hasNext();
-
-        List<BookList> bookLists = new ArrayList<>();
-        for(int i = 0; i < books.size(); i++){
-            BookList bookList = BookList.builder()
-                    .bookId(books.get(i).getBookId())
-                    .isbn13(books.get(i).getIsbn13())
-                    .progress(books.get(i).getProgress())
-                    .saleState(books.get(i).getSaleState())
-                    .img(books.get(i).getImg())
-                    .build();
-
-            bookLists.add(bookList);
-        }
-
-        LibraryList libraryList = new LibraryList(nowPage, hasNext, bookLists);
-        return libraryList;
+        return bookService.getBookList(profileId, pageable);
     }
 
     /**
@@ -206,6 +188,15 @@ public class BookController {
     public String deleteBook(@RequestParam("bookId") String bookId){
         bookService.deleteBook(bookId);
         return "success";
+    }
+
+    /**
+     * 책 거래 기능
+     * 설명: 요청받은 책을 거래 가능한 유저 검색(SaleSate == POS)
+     */
+    @GetMapping("/saleState")
+    public SalePosMemberList searchSaleState(@RequestParam("isbn13") String isbn13) throws IOException {
+       return bookService.searchSaleState(isbn13);
     }
 
 }
