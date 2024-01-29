@@ -146,6 +146,8 @@ public class MessageServiceImpl implements MessageService{
         String storeImgName = message.getSender().getImg().getStoreImgName();
         ImgFileDto imgFileDto = imgStore.getImgFile(storeImgName);
 
+        message.updateState();
+
         ReceivedMessageContent receivedMessageContent = ReceivedMessageContent.builder()
                 .senderId(senderId)
                 .title(title)

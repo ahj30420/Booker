@@ -71,7 +71,7 @@ public class BookServiceImpl implements BookService{
 
         List<SimpleReport> reports = bookRepository.searchProgressReports(bookId, sharing);
 
-        BookDetail bookDetail = new BookDetail(true, book.getProgress(), reports);
+        BookDetail bookDetail = new BookDetail(true, bookId, book.getProgress(), reports);
 
         return bookDetail;
     }
@@ -156,6 +156,7 @@ public class BookServiceImpl implements BookService{
         String bookId = changeSaleState.getBookId();
         SaleState saleState = changeSaleState.getSaleState();
 
+        log.info("bookId={}", bookId);
         Book book = bookRepository.findByBookId(bookId);
         book.changeSaleState(saleState);
     }

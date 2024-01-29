@@ -5,8 +5,10 @@ import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import project.booker.domain.Enum.Sharing;
 import project.booker.domain.embedded.UploadImg;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -47,6 +49,16 @@ public class MemberProfile {
         memberProfile.img = img;
 
         return memberProfile;
+    }
+
+    //----------------------------------------수정 메서드-------------------------------------------------------
+    public void updateProfile(String intro, UploadImg uploadImg) {
+        if(intro != null){
+            this.intro = intro;
+        }
+        if(uploadImg != null){
+            this.img = uploadImg;
+        }
     }
 
     //--------------------------------------연관 관계 메서드-----------------------------------------------------

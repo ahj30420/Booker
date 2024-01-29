@@ -8,17 +8,10 @@ import project.booker.controller.FollowController.dto.FollowCount;
 import project.booker.controller.FollowController.dto.FollowProfile;
 import project.booker.controller.FollowController.dto.IsFollowing;
 import project.booker.controller.FollowController.dto.TargetProfile;
-import project.booker.domain.Follow;
 import project.booker.dto.AuthenticatedUser;
-import project.booker.dto.ImgFileDto;
 import project.booker.service.FollowService.FollowService;
-import project.booker.util.ImgStore;
 
-import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.util.ArrayList;
-import java.util.Base64;
 import java.util.List;
 
 @Slf4j

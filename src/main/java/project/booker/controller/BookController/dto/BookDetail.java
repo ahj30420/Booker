@@ -14,6 +14,7 @@ import java.util.List;
 public class BookDetail {
 
     private boolean exist;
+    private String bookId;
     private Progress progress;
     private List<SimpleReport> simpleReports = new ArrayList<>();
 

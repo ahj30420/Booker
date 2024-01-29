@@ -1,16 +1,19 @@
 package project.booker.service.ProfileService;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 import project.booker.controller.ProfileController.dto.*;
 import project.booker.domain.Interest;
 import project.booker.domain.Member;
 import project.booker.domain.MemberProfile;
 import project.booker.domain.embedded.UploadImg;
 import project.booker.domain.Enum.Social;
+import project.booker.dto.Enum.DefaultImg;
 import project.booker.dto.ImgFileDto;
 import project.booker.exception.errorcode.ErrorCode;
 import project.booker.exception.exceptions.DuplicatedNickNameException;
@@ -24,7 +27,9 @@ import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
+@Transactional
 @RequiredArgsConstructor
 public class ProfileServiceImpl implements ProfileService{
 
@@ -41,7 +46,6 @@ public class ProfileServiceImpl implements ProfileService{
      * 4. 소셜 회원일 경우 JWT 발급을 위해 회원정보(idx,이름,닉네임)를 같이 보내준다.
      */
     @Override
-    @Transactional
     public Map<String, Object> save(String memberId, SaveProfileDto saveProfileDto, UploadImg uploadImg) {
 
         Map<String, Object> result = new HashMap<>();
@@ -101,6 +105,32 @@ public class ProfileServiceImpl implements ProfileService{
         ViewProfileDto viewProfileDto = new ViewProfileDto(nickname, intro, imgFile, interests);
 
         return viewProfileDto;
+    }
+
+    /**
+     * 프로필 수정
+     */
+    @Override
+    public void updateProfile(String profileId, UpdateProfileDto updateProfileDto) throws IOException {
+
+        MemberProfile profile = profileRepository.findByProfileId(profileId);
+
+        String intro = updateProfileDto.getIntro();
+
+        UploadImg uploadImg = null;
+        MultipartFile imgFile = updateProfileDto.getImageFile();
+        boolean isDefaultImg = updateProfileDto.isDefaultImg();
+        if(imgFile != null || isDefaultImg){
+            uploadImg = imgStore.storeImge(imgFile, DefaultImg.PROFILE);
+        }
+
+        profile.updateProfile(intro, uploadImg);
+
+        List<String> interestList = updateProfileDto.getInterestList();
+        if(interestList != null){
+            interestRepository.deleteByMemberProfile(profile);
+            interestRepository.bulkSave(profile.getProfilePk(), interestList);
+        }
     }
 
     /**

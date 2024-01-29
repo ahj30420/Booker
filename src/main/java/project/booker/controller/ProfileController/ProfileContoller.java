@@ -103,6 +103,29 @@ public class  ProfileContoller {
     }
 
     /**
+     * 프로필 수정
+     * 1. 입력값 검증
+     * 2. 변경 감지를 활용해 프로필 수정
+     */
+    @PatchMapping("/profileInfo")
+    public void updateProfile(HttpServletRequest request,
+                              @Validated @ModelAttribute UpdateProfileDto updateProfileDto,
+                              BindingResult bindingResult) throws IOException {
+
+        if(bindingResult.hasErrors()){
+            sendValidationError(bindingResult);
+        }
+
+        List<String> interestList = updateProfileDto.getInterestList();
+        log.info("interestList={}", interestList.get(0));
+
+        AuthenticatedUser authenticatedUser = (AuthenticatedUser) request.getAttribute("AuthenticatedUser");
+        String profileId = authenticatedUser.getProfileId();
+
+        profileService.updateProfile(profileId, updateProfileDto);
+    }
+
+    /**
      * 관심사가 비슷한 유저 추천
      */
     @GetMapping("/profile/Recommendation")

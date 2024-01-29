@@ -62,7 +62,6 @@ public class ReportServiceImpl implements ReportService{
     @Override
     public void updateReport(UpdateReportDto updateReportDto, UploadImg uploadImg) {
         String reportId = updateReportDto.getReportId();
-        log.info("reportId={}",reportId);
         Report report = reportRepository.findByReportId(reportId);
 
         String title = updateReportDto.getTitle();

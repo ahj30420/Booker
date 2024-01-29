@@ -6,6 +6,7 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import project.booker.domain.Enum.State;
+import project.booker.domain.embedded.UploadImg;
 
 import java.time.LocalDateTime;
 
@@ -48,5 +49,12 @@ public class Message {
        message.redate = LocalDateTime.now();
 
        return message;
+    }
+
+    //----------------------------------------수정 메서드-------------------------------------------------------
+    public void updateState(){
+        if(this.state == State.BEFORE){
+            this.state = State.READ;
+        }
     }
 }

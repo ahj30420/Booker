@@ -20,4 +20,6 @@ public interface ProfileService {
     SearchProfileList searchProfile(String nickname) throws IOException;
 
     MessageProfile searchSimpleProfile(String profileId) throws IOException;
+
+    void updateProfile(String profileId, UpdateProfileDto updateProfileDto) throws IOException;
 }
