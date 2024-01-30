@@ -58,6 +58,7 @@ public class OauthController {
 
         result.put("accessToken", jwt.getAccessToken());
         result.put("refreshToken", jwt.getRefreshToken());
+        result.put("nickname", member.getMemberProfile().getNickname());
 
         return result;
     }
@@ -94,6 +95,7 @@ public class OauthController {
 
         result.put("accessToken", jwt.getAccessToken());
         result.put("refreshToken", jwt.getRefreshToken());
+        result.put("nickname", member.getMemberProfile().getNickname());
 
         return result;
     }

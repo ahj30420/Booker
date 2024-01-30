@@ -2,6 +2,7 @@ package project.booker.controller.ReportController;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.MessageSource;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
@@ -18,6 +19,7 @@ import project.booker.dto.ImgFileDto;
 import project.booker.exception.exceptions.ValidationException;
 import project.booker.service.ReportService.ReportService;
 import project.booker.util.ImgStore;
+import com.amazonaws.services.s3.AmazonS3;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -33,6 +35,11 @@ public class ReportController {
     private final ReportService reportService;
     private final MessageSource messageSource;
     private final ImgStore imgStore;
+    private final AmazonS3 amazonS3;
+
+
+    @Value("${cloud.aws.s3.bucket}")
+    private String bucket;
 
     /**
      * 독후감 등록하기
@@ -69,18 +76,16 @@ public class ReportController {
         LocalDateTime redate = report.getRedate();
 
         String storeImgName = report.getImg().getStoreImgName();
-        ImgFileDto imgFile = imgStore.getImgFile(storeImgName);
+        String imgURL = amazonS3.getUrl(bucket, storeImgName).toString();
 
         Map<String, Object> map = new HashMap<>();
         map.put("title", title);
         map.put("content", content);
         map.put("sharing", sharing);
         map.put("redate", redate);
-        map.put("imgBytes", imgFile.getBase64Image());
-        map.put("mimeType", imgFile.getMimeType());
+        map.put("imgURL", imgURL);
 
         return map;
-
     }
 
     /**

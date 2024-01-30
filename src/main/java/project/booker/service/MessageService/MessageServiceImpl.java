@@ -2,6 +2,7 @@ package project.booker.service.MessageService;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import project.booker.controller.MessageController.dto.*;
@@ -12,6 +13,7 @@ import project.booker.dto.ImgFileDto;
 import project.booker.repository.MessageRepository;
 import project.booker.repository.PofileRepository.ProfileRepository;
 import project.booker.util.ImgStore;
+import com.amazonaws.services.s3.AmazonS3;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -26,6 +28,10 @@ public class MessageServiceImpl implements MessageService{
     private final MessageRepository messageRepository;
     private final ProfileRepository profileRepository;
     private final ImgStore imgStore;
+    private final AmazonS3 amazonS3;
+
+    @Value("${cloud.aws.s3.bucket}")
+    private String bucket;
 
     /**
      * 쪽지 보내기
@@ -75,7 +81,7 @@ public class MessageServiceImpl implements MessageService{
             String nickname = message.getRecipient().getNickname();
 
             String storeImgName = message.getRecipient().getImg().getStoreImgName();
-            ImgFileDto imgFileDto = imgStore.getImgFile(storeImgName);
+            String imgURL = amazonS3.getUrl(bucket,storeImgName).toString();
 
             MessageInfo messageInfo = MessageInfo.builder()
                     .messageId(messageId)
@@ -83,7 +89,7 @@ public class MessageServiceImpl implements MessageService{
                     .state(state)
                     .redate(redate)
                     .nickname(nickname)
-                    .imgFileDto(imgFileDto)
+                    .imgURL(imgURL)
                     .build();
 
             messageList.getMessageList().add(messageInfo);
@@ -112,7 +118,7 @@ public class MessageServiceImpl implements MessageService{
             String nickname = message.getSender().getNickname();
 
             String storeImgName = message.getSender().getImg().getStoreImgName();
-            ImgFileDto imgFileDto = imgStore.getImgFile(storeImgName);
+            String imgURL = amazonS3.getUrl(bucket,storeImgName).toString();
 
             MessageInfo messageInfo = MessageInfo.builder()
                     .messageId(messageId)
@@ -120,7 +126,7 @@ public class MessageServiceImpl implements MessageService{
                     .state(state)
                     .redate(redate)
                     .nickname(nickname)
-                    .imgFileDto(imgFileDto)
+                    .imgURL(imgURL)
                     .build();
 
             messageList.getMessageList().add(messageInfo);
@@ -144,7 +150,7 @@ public class MessageServiceImpl implements MessageService{
         String nickname = message.getSender().getNickname();
 
         String storeImgName = message.getSender().getImg().getStoreImgName();
-        ImgFileDto imgFileDto = imgStore.getImgFile(storeImgName);
+        String imgURL = amazonS3.getUrl(bucket,storeImgName).toString();
 
         message.updateState();
 
@@ -153,7 +159,7 @@ public class MessageServiceImpl implements MessageService{
                 .title(title)
                 .content(content)
                 .nickname(nickname)
-                .imgFileDto(imgFileDto)
+                .imgURL(imgURL)
                 .build();
 
         return receivedMessageContent;
@@ -173,13 +179,13 @@ public class MessageServiceImpl implements MessageService{
         String nickname = message.getRecipient().getNickname();
 
         String storeImgName = message.getRecipient().getImg().getStoreImgName();
-        ImgFileDto imgFileDto = imgStore.getImgFile(storeImgName);
+        String imgURL = amazonS3.getUrl(bucket,storeImgName).toString();
 
         SentMessageContent sentMessageContent = SentMessageContent.builder()
                 .title(title)
                 .content(content)
                 .nickname(nickname)
-                .imgFileDto(imgFileDto)
+                .imgURL(imgURL)
                 .build();
 
         return sentMessageContent;

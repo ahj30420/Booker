@@ -1,5 +1,8 @@
 package project.booker.util;
 
+import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.model.ObjectMetadata;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -16,10 +19,13 @@ import java.util.UUID;
 
 @Slf4j
 @Component
+@RequiredArgsConstructor
 public class ImgStore {
 
-    @Value("${img.dir}")
-    private String ImgDir;
+    private final AmazonS3 amazonS3;
+
+    @Value("${cloud.aws.s3.bucket}")
+    private String bucket;
 
     /**
      * 이미지 파일에서 실제 이미지 이름과 DB에 저장할 이미지 이름 추출
@@ -38,25 +44,30 @@ public class ImgStore {
 
         String originalFilename = imgFile.getOriginalFilename();
         String storeFileName = createStoreFileName(originalFilename);
-        imgFile.transferTo(new File(getFullPath(storeFileName)));
+
+        ObjectMetadata metadata = new ObjectMetadata();
+        metadata.setContentLength(imgFile.getSize());
+        metadata.setContentType(imgFile.getContentType());
+
+        amazonS3.putObject(bucket, storeFileName, imgFile.getInputStream(), metadata);
 
         return new UploadImg(originalFilename, storeFileName);
     }
 
-    /**
-     * 이미지 파일 전송을 위해 base64인코딩 + MiMe 타입 반환
-     */
-    public ImgFileDto getImgFile(String storeImgName) throws IOException {
-        File imgFile = new File(getFullPath(storeImgName));
-        byte[] imgBytes = Files.readAllBytes(imgFile.toPath());
-        String base64Image = Base64.getEncoder().encodeToString(imgBytes);
-        String mimeType = getMimeType(storeImgName);
-
-        return ImgFileDto.builder()
-                .base64Image(base64Image)
-                .mimeType(mimeType)
-                .build();
-    }
+//    /**
+//     * 이미지 파일 전송을 위해 base64인코딩 + MiMe 타입 반환
+//     */
+//    public ImgFileDto getImgFile(String storeImgName) throws IOException {
+//        File imgFile = new File(getFullPath(storeImgName));
+//        byte[] imgBytes = Files.readAllBytes(imgFile.toPath());
+//        String base64Image = Base64.getEncoder().encodeToString(imgBytes);
+//        String mimeType = getMimeType(storeImgName);
+//
+//        return ImgFileDto.builder()
+//                .base64Image(base64Image)
+//                .mimeType(mimeType)
+//                .build();
+//    }
 
     //--------------------------------------Private Method-----------------------------------------------------
 
@@ -78,19 +89,19 @@ public class ImgStore {
         return originalFilename.substring(pos+1);
     }
 
-    /**
-     * MiMe타입 반환하기
-     */
-    private String getMimeType(String storeFileName){
-        String ext = extractExt(storeFileName);
-        return "image/"+ext;
-    }
-
-    /**
-     * 파일을 저장할 경로 설정
-     */
-    private String getFullPath(String storeFileName) {
-        return ImgDir + storeFileName;
-    }
+//    /**
+//     * MiMe타입 반환하기
+//     */
+//    private String getMimeType(String storeFileName){
+//        String ext = extractExt(storeFileName);
+//        return "image/"+ext;
+//    }
+//
+//    /**
+//     * 파일을 저장할 경로 설정
+//     */
+//    private String getFullPath(String storeFileName) {
+//        return ImgDir + storeFileName;
+//    }
 
 }

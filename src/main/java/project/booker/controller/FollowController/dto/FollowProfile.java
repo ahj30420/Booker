@@ -12,14 +12,14 @@ public class FollowProfile {
     private String profileId;
     private String nickname;
     private String intro;
-    private ImgFileDto imgFile;
+    private String imgURL;
 
     @Builder
-    public FollowProfile(String profileId, String nickname, String intro, ImgFileDto imgFile) {
+    public FollowProfile(String profileId, String nickname, String intro, String imgURL) {
         this.profileId = profileId;
         this.nickname = nickname;
         this.intro = intro;
-        this.imgFile = imgFile;
+        this.imgURL = imgURL;
     }
 
 }

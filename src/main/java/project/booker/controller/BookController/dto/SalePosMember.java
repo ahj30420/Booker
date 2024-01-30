@@ -10,13 +10,13 @@ import project.booker.dto.ImgFileDto;
 public class SalePosMember {
 
     private String profileId;
-    private ImgFileDto imgFileDto;
+    private String imgURL;
     private String nickname;
 
     @Builder
-    public SalePosMember(String profileId, ImgFileDto imgFileDto, String nickname) {
+    public SalePosMember(String profileId, String imgURL, String nickname) {
         this.profileId = profileId;
-        this.imgFileDto = imgFileDto;
+        this.imgURL = imgURL;
         this.nickname = nickname;
     }
 }

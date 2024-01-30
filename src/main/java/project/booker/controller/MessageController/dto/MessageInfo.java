@@ -17,16 +17,16 @@ public class MessageInfo {
     private State state;
     private LocalDateTime redate;
     private String nickname;
-    private ImgFileDto imgFileDto;
+    private String imgURL;
 
     @Builder
-    public MessageInfo(String messageId, String title, State state, LocalDateTime redate, String nickname, ImgFileDto imgFileDto) {
+    public MessageInfo(String messageId, String title, State state, LocalDateTime redate, String nickname, String imgURL) {
         this.messageId = messageId;
         this.title = title;
         this.state = state;
         this.redate = redate;
         this.nickname = nickname;
-        this.imgFileDto = imgFileDto;
+        this.imgURL = imgURL;
     }
 
 }

@@ -10,11 +10,11 @@ import project.booker.dto.ImgFileDto;
 public class MessageProfile {
 
     private String nickname;
-    private ImgFileDto imgFileDto;
+    private String imgURL;
 
     @Builder
-    public MessageProfile(String nickname, ImgFileDto imgFileDto) {
+    public MessageProfile(String nickname, String imgURL) {
         this.nickname = nickname;
-        this.imgFileDto = imgFileDto;
+        this.imgURL = imgURL;
     }
 }

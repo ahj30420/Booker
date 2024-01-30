@@ -12,13 +12,13 @@ public class SearchProfile {
     private String profileId;
     private String nickname;
     private String intro;
-    private ImgFileDto imgFileDto;
+    private String imgURL;
 
     @Builder
-    public SearchProfile(String profileId, String nickname, String intro, ImgFileDto imgFileDto) {
+    public SearchProfile(String profileId, String nickname, String intro, String imgURL) {
         this.profileId = profileId;
         this.nickname = nickname;
         this.intro = intro;
-        this.imgFileDto = imgFileDto;
+        this.imgURL = imgURL;
     }
 }

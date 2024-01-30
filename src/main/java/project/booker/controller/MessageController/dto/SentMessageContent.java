@@ -12,14 +12,14 @@ public class SentMessageContent {
     private String title;
     private String content;
     private String nickname;
-    private ImgFileDto imgFileDto;
+    private String imgURL;
 
     @Builder
-    public SentMessageContent(String title, String content, String nickname, ImgFileDto imgFileDto) {
+    public SentMessageContent(String title, String content, String nickname, String imgURL) {
         this.title = title;
         this.content = content;
         this.nickname = nickname;
-        this.imgFileDto = imgFileDto;
+        this.imgURL = imgURL;
     }
 
 }

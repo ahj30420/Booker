@@ -14,7 +14,7 @@ public class ViewProfileDto {
 
     private String nickname;
     private String intro;
-    private ImgFileDto imgFile;
+    private String imgURL;
     private List<String> interets;
 
 }

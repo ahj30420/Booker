@@ -2,6 +2,7 @@ package project.booker.service.BookService;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
@@ -19,6 +20,7 @@ import project.booker.exception.exceptions.NotExistBookException;
 import project.booker.repository.BookRepository.BookRepository;
 import project.booker.repository.PofileRepository.ProfileRepository;
 import project.booker.util.ImgStore;
+import com.amazonaws.services.s3.AmazonS3;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -33,6 +35,10 @@ public class BookServiceImpl implements BookService{
     private final BookRepository bookRepository;
     private final ProfileRepository profileRepository;
     private final ImgStore imgStore;
+    private final AmazonS3 amazonS3;
+
+    @Value("${cloud.aws.s3.bucket}")
+    private String bucket;
 
     /**
      * 개인 서재에 책 추가하기
@@ -183,11 +189,11 @@ public class BookServiceImpl implements BookService{
             String nickname = book.getMemberProfile().getNickname();
             String storeImgName = book.getMemberProfile().getImg().getStoreImgName();
 
-            ImgFileDto imgFileDto = imgStore.getImgFile(storeImgName);
+            String imgURL = amazonS3.getUrl(bucket,storeImgName).toString();
 
             SalePosMember member = SalePosMember.builder()
                     .profileId(profileId)
-                    .imgFileDto(imgFileDto)
+                    .imgURL(imgURL)
                     .nickname(nickname)
                     .build();
 

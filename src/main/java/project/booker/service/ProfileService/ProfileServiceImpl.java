@@ -2,6 +2,7 @@ package project.booker.service.ProfileService;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
@@ -22,6 +23,7 @@ import project.booker.repository.InterestRepository.InterestRepository;
 import project.booker.repository.LoginRepository;
 import project.booker.repository.PofileRepository.ProfileRepository;
 import project.booker.util.ImgStore;
+import com.amazonaws.services.s3.AmazonS3;
 
 import java.io.IOException;
 import java.util.*;
@@ -37,6 +39,10 @@ public class ProfileServiceImpl implements ProfileService{
     private final LoginRepository loginRepository;
     private final InterestRepository interestRepository;
     private final ImgStore imgStore;
+    private final AmazonS3 amazonS3;
+
+    @Value("${cloud.aws.s3.bucket}")
+    private String bucket;
 
     /**
      * Member 프로필 등록
@@ -95,14 +101,14 @@ public class ProfileServiceImpl implements ProfileService{
         String intro = memberProfile.getIntro();
         String storeImgName = memberProfile.getImg().getStoreImgName();
 
-        ImgFileDto imgFile = imgStore.getImgFile(storeImgName);
+        String imgURL = amazonS3.getUrl(bucket,storeImgName).toString();
 
         List<String> interests = memberProfile.getInterests()
                 .stream()
                 .map(Interest::getInterest)
                 .collect(Collectors.toList());
 
-        ViewProfileDto viewProfileDto = new ViewProfileDto(nickname, intro, imgFile, interests);
+        ViewProfileDto viewProfileDto = new ViewProfileDto(nickname, intro, imgURL, interests);
 
         return viewProfileDto;
     }
@@ -161,7 +167,7 @@ public class ProfileServiceImpl implements ProfileService{
             String nickname = profile.getNickname();
             String storeImgName = profile.getImg().getStoreImgName();
 
-            ImgFileDto imgFile = imgStore.getImgFile(storeImgName);
+            String imgURL = amazonS3.getUrl(bucket,storeImgName).toString();
 
             List<String> interestList = profile.getInterests()
                     .stream()
@@ -171,7 +177,7 @@ public class ProfileServiceImpl implements ProfileService{
             RecommendProfileDto recommendProfileDto = RecommendProfileDto.builder()
                     .profileId(id)
                     .nickname(nickname)
-                    .imgFileDto(imgFile)
+                    .imgURL(imgURL)
                     .interests(interestList)
                     .build();
 
@@ -196,13 +202,13 @@ public class ProfileServiceImpl implements ProfileService{
             String intro = memberProfile.getIntro();
             String storeImgName = memberProfile.getImg().getStoreImgName();
 
-            ImgFileDto imgFile = imgStore.getImgFile(storeImgName);
+            String imgURL = amazonS3.getUrl(bucket,storeImgName).toString();
 
             SearchProfile searchProfile = SearchProfile.builder()
                     .profileId(profileId)
                     .nickname(name)
                     .intro(intro)
-                    .imgFileDto(imgFile)
+                    .imgURL(imgURL)
                     .build();
 
             searchProfileList.getSearchProfileList().add(searchProfile);
@@ -220,11 +226,11 @@ public class ProfileServiceImpl implements ProfileService{
 
         String nickname = profile.getNickname();
         String storeImgName = profile.getImg().getStoreImgName();
-        ImgFileDto imgFile = imgStore.getImgFile(storeImgName);
+        String imgURL = amazonS3.getUrl(bucket,storeImgName).toString();
 
         MessageProfile messageProfile = MessageProfile.builder()
                 .nickname(nickname)
-                .imgFileDto(imgFile)
+                .imgURL(imgURL)
                 .build();
 
         return messageProfile;

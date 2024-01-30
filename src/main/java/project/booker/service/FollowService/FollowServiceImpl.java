@@ -2,6 +2,7 @@ package project.booker.service.FollowService;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import project.booker.controller.FollowController.dto.FollowCount;
@@ -15,6 +16,7 @@ import project.booker.exception.exceptions.InvalidProfileIdException;
 import project.booker.repository.FollowRepository;
 import project.booker.repository.PofileRepository.ProfileRepository;
 import project.booker.util.ImgStore;
+import com.amazonaws.services.s3.AmazonS3;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -29,6 +31,10 @@ public class FollowServiceImpl implements  FollowService{
     private final FollowRepository followRepository;
     private final ProfileRepository profileRepository;
     private final ImgStore imgStore;
+    private final AmazonS3 amazonS3;
+
+    @Value("${cloud.aws.s3.bucket}")
+    private String bucket;
 
     /**
      * 팔로우 수 조회
@@ -75,13 +81,13 @@ public class FollowServiceImpl implements  FollowService{
             String intro = follow.getFollower().getIntro();
             String storeImgName = follow.getFollower().getImg().getStoreImgName();
 
-            ImgFileDto imgFile = imgStore.getImgFile(storeImgName);
+            String imgURL = amazonS3.getUrl(bucket,storeImgName).toString();
 
             FollowProfile followProfile = FollowProfile.builder()
                     .profileId(userProfileId)
                     .nickname(nickname)
                     .intro(intro)
-                    .imgFile(imgFile)
+                    .imgURL(imgURL)
                     .build();
 
             result.add(followProfile);
@@ -113,12 +119,12 @@ public class FollowServiceImpl implements  FollowService{
             String intro = follow.getFollowing().getIntro();
             String storeImgName = follow.getFollowing().getImg().getStoreImgName();
 
-            ImgFileDto imgFile = imgStore.getImgFile(storeImgName);
+            String imgURL = amazonS3.getUrl(bucket,storeImgName).toString();
             FollowProfile followProfile = FollowProfile.builder()
                     .profileId(userProfileId)
                     .nickname(nickname)
                     .intro(intro)
-                    .imgFile(imgFile)
+                    .imgURL(imgURL)
                     .build();
 
             result.add(followProfile);
