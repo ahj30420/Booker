@@ -23,7 +23,7 @@ public class WebConfig implements WebMvcConfigurer {
     @Override
     public void addCorsMappings(CorsRegistry registry){
         registry.addMapping("/**") // cors를 적용할 spring서버의 url 패턴.
-                .allowedOrigins("http://localhost:3000") // cors를 허용할 도메인. 제한을 모두 해제하려면 "**"
+                .allowedOrigins("http://3.36.196.75:3000") // cors를 허용할 도메인. 제한을 모두 해제하려면 "**"
                 .allowedMethods("OPTIONS","GET","POST","PUT","DELETE") // cors를 허용할 method
                 .allowCredentials(true);
     }

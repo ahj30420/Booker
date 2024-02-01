@@ -121,7 +121,7 @@ public class BookController {
             return bookDetail;
         }
 
-        bookDetail = new BookDetail(exist, null, null, new ArrayList<>());
+        bookDetail = new BookDetail(exist, null, null, null, new ArrayList<>());
         return bookDetail;
     }
 

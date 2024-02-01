@@ -15,6 +15,7 @@ public class BookDetail {
 
     private boolean exist;
     private String bookId;
+    private String user;
     private Progress progress;
     private List<SimpleReport> simpleReports = new ArrayList<>();
 
