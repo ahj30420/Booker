@@ -19,7 +19,7 @@ import java.util.*;
 
 @Slf4j
 @RestController
-@RequestMapping("/book")
+@RequestMapping("/api/book")
 @RequiredArgsConstructor
 public class BookController {
 
