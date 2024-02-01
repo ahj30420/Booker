@@ -105,8 +105,7 @@ public class LoginServiceImpl implements LoginService {
 
             Map<String, Object> NewClaims = new HashMap<>();
             AuthenticatedUser authenticatedUser = new AuthenticatedUser(member.getMemberProfile().getProfileId(), member.getName(),member.getMemberProfile().getNickname());
-            String authenticatedUserJson = objectMapper.writeValueAsString(authenticatedUser);
-            NewClaims.put("AuthenticetedUser", authenticatedUserJson);
+            NewClaims.put("AuthenticetedUser", authenticatedUser);
             AccessTokenDto accessToken = jwtProvider.createAccessToken(NewClaims);
             return accessToken;
         } catch (Exception e) {
