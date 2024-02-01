@@ -65,13 +65,15 @@ public class BookServiceImpl implements BookService{
         if(book == null){ throw new NotExistBookException(ErrorCode.NotExist_Book); }
 
         Sharing sharing = null;
+        String user = "me";
         if(!book.getMemberProfile().getProfileId().equals(profileId)){
             sharing = Sharing.PUBLIC;
+            user = "other";
         }
 
         List<SimpleReport> reports = bookRepository.searchProgressReports(bookId, sharing);
 
-        BookDetail bookDetail = new BookDetail(true, bookId, book.getProgress(), reports);
+        BookDetail bookDetail = new BookDetail(true, bookId, user, book.getProgress(), reports);
 
         return bookDetail;
     }

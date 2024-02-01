@@ -80,6 +80,7 @@ public class  ProfileContoller {
 
         result.put("accessToken", jwt.getAccessToken());
         result.put("refreshToken", jwt.getRefreshToken());
+        result.put("nickname", (String) socialMap.get("nickname"));
 
         return result;
     }
