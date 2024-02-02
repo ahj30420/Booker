@@ -12,7 +12,6 @@ import project.booker.dto.AuthenticatedUser;
 import project.booker.controller.BookController.dto.NewBook;
 import project.booker.service.AladinAPIService.AladinAPIService;
 import project.booker.service.BookService.BookService;
-import project.booker.service.LibraryAPIService.LibraryAPIService;
 
 import java.io.IOException;
 import java.util.*;
@@ -24,7 +23,6 @@ import java.util.*;
 public class BookController {
 
     private final AladinAPIService aladinAPIService;
-    private final LibraryAPIService libraryAPIService;
     private final BookService bookService;
 
     /**
@@ -52,22 +50,6 @@ public class BookController {
     public BookInfo bookLookUp(@RequestParam("ISBN13") String isbn13){
         return aladinAPIService.BookLookUp(isbn13);
     }
-
-    /**
-     * 도서 소장 도서관 조회
-     */
-    @GetMapping("/collection/library")
-    public Librarys libSrchByBook(@RequestParam("isbn13") String isbn13,
-                                 @RequestParam("region") String region) {
-
-        return libraryAPIService.libSrchByBook(isbn13, region);
-    }
-
-//    /**
-//     * 도서관 검색
-//     */
-//    @GetMapping("/libraryInfo")
-//    public LibraryInfo libSrch(@RequestParam(""))
 
     /**
      * 개인 서재에 책 추가하기
