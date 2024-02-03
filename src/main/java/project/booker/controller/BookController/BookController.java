@@ -29,7 +29,7 @@ public class BookController {
      * 알라딘 베스트 셀러 조회
      */
     @GetMapping("/bestseller")
-    public BestSellerList bestSeller(@RequestParam(name = "start", defaultValue = "1") String start){
+    public BestSellerList bestSeller(@RequestParam(name = "start", defaultValue = "2") String start){
         return aladinAPIService.getBestSeller(start);
     }
 
