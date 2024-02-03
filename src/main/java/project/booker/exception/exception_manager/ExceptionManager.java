@@ -66,6 +66,11 @@ public class ExceptionManager {
         return new ResponseEntity<>(Response.error(e.getErrorCode().name(), e.getErrorCode().getMessage()), e.getErrorCode().getStatus());
     }
 
+    //InvalidMemberException 발생시 작동(MemberId가 유효하지 않을 경우)
+    @ExceptionHandler(InvalidMemberException.class)
+    public ResponseEntity<Response> InvalidMemberException(InvalidMemberException e){
+        return new ResponseEntity<>(Response.error(e.getErrorCode().name(), e.getErrorCode().getMessage()), e.getErrorCode().getStatus());
+    }
 
     //--------------------------------------Inner Class-----------------------------------------------------
     

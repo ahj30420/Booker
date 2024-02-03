@@ -17,6 +17,7 @@ import project.booker.dto.Enum.DefaultImg;
 import project.booker.dto.ImgFileDto;
 import project.booker.exception.errorcode.ErrorCode;
 import project.booker.exception.exceptions.DuplicatedNickNameException;
+import project.booker.exception.exceptions.InvalidMemberException;
 import project.booker.exception.exceptions.InvalidProfileIdException;
 import project.booker.repository.InterestRepository.InterestRepository;
 import project.booker.repository.LoginRepository;
@@ -57,6 +58,11 @@ public class ProfileServiceImpl implements ProfileService{
         String intro = saveProfileDto.getIntro();
 
         Member member = loginRepository.findByMemberId(memberId);
+
+        if(member == null){
+            throw new InvalidMemberException(ErrorCode.INVALID_MEMBER);
+        }
+
         MemberProfile memberProfile = MemberProfile.createMemberProfile(member, nickname, intro, uploadImg);
 
         profileRepository.save(memberProfile);
