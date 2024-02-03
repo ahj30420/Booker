@@ -32,18 +32,18 @@ public class WebConfig implements WebMvcConfigurer {
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(new VerifyUserFilter(loginService, objectMapper))
                 .order(1)
-                .addPathPatterns("/login");
+                .addPathPatterns("/api/login");
 
         registry.addInterceptor(new CreateJwtFilter(loginService, objectMapper, jwtProvider))
                 .order(2)
-                .addPathPatterns("/login");
+                .addPathPatterns("/api/login");
 
         registry.addInterceptor(new JwtAuthorizationFilter(jwtProvider, objectMapper))
                 .order(3)
                 .addPathPatterns("/**")
-                .excludePathPatterns("/login", "/auth/refresh/token", "/signup", "/profile",
-                        "/oauth2/code/naver", "/oauth2/code/google", "/book/bestseller",
-                        "/book");
+                .excludePathPatterns("/api/login", "/api/auth/refresh/token", "/api/signup", "/api/profile",
+                        "/api/oauth2/code/naver", "/api/oauth2/code/google", "/api/book/bestseller",
+                        "/api/book");
     }
 
 }
