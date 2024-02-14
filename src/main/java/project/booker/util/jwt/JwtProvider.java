@@ -79,7 +79,7 @@ public class JwtProvider {
      * AccessToken 만료 기간 설정(30분)
      */
     private Date getExpireDateAccessToken() {
-        long expireTime = 1000 * 60;
+        long expireTime = 1000 * 60 * 30;
         return new Date(System.currentTimeMillis() + expireTime);
     }
 
