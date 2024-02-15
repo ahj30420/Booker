@@ -3,6 +3,7 @@ package project.booker.controller.BookController;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.web.bind.annotation.*;
@@ -118,7 +119,7 @@ public class BookController {
      */
     @GetMapping("/library/list")
     public LibraryList searchBookList(HttpServletRequest request,
-                                        @PageableDefault(page = 0, size = 5) Pageable pageable,
+                                        @RequestParam(name="page", defaultValue = "0") String page,
                                         @RequestParam(name="profileId", required = false) String profileId){
 
         if(profileId == null) {
@@ -126,6 +127,7 @@ public class BookController {
             profileId = authenticatedUser.getProfileId();
         }
 
+        Pageable pageable = PageRequest.of(Integer.parseInt(page), 4);
         return bookService.getBookList(profileId, pageable);
     }
 
